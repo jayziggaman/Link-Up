@@ -854,19 +854,11 @@ const App = () => {
           const words = storyText.split(/['/', ' ', ':', ';', ',']/)
           const arr = []
           users.map(user => {
-            console.log(`@${user.username}`)
-            const condition = words.find(word => {
-              console.log(word)
-              console.log(`@${user.username.toString()}` === word.toString())
-              return  word === `@${user.username}`
-            })
-            console.log(condition)
+            const condition = words.find(word => word === `@${user.username}`)
             if (condition) {
               arr.push(user)
             }
           })
-          console.log(arr)
-          console.log(storyText)
           for (let i = 0; i < arr.length; i++) {
             const userRef = doc(db, 'users', arr[i].id)
             updateDoc(userRef, {

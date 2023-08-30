@@ -143,8 +143,11 @@ const Profile = () => {
 
           }  else if (btn.textContent === 'Likes') {
             let arr = []
-            for(let i = 0; i < user.likes.value.length; i++) {
-              arr.push(allPosts.find(post => post.id === user.likes.value[i]))
+            for (let i = 0; i < user.likes.value.length; i++) {
+              const like = allPosts.find(post => post.id === user.likes.value[i])
+              if (like) {
+                arr.push(like)
+              }
             }
             setPostTypeArr(arr)
           } 

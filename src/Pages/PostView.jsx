@@ -331,6 +331,7 @@ const PostView = () => {
                     value: [...user.notifications.value, {
                       id: notiId,
                       type: 'comment-tag', 
+                      taggedBy: userAuth,
                       value: id, 
                       postId: postId,
                       sentAt: time.getTime()
@@ -407,6 +408,7 @@ const PostView = () => {
                         value: [...user.notifications.value, {
                           id: notiId,
                           type: 'comment-tag', 
+                          taggedBy: userAuth,
                           value: id, 
                           postId: postId,
                           sentAt: time.getTime()
@@ -439,6 +441,7 @@ const PostView = () => {
             })
           })
         } else if (commentIsOneVid) {
+          const id = uuidv4()
           const selected = files[0]
           let vidUrl
           const avatarRef = ref(storage, `media-comments${userAuth}/${time.getTime().toString()}`)
@@ -446,7 +449,6 @@ const PostView = () => {
             getDownloadURL(avatarRef).then(url => {
               vidUrl = url
             }).then(() => {
-              const id = uuidv4()
               setDoc(doc(commentRef, id), {
                 id: id,
                 type: 'Video-Comment',
@@ -473,6 +475,7 @@ const PostView = () => {
                       value: [...user.notifications.value, {
                         id: notiId,
                         type: 'comment-tag', 
+                        taggedBy: userAuth,
                         value: id, 
                         postId: postId,
                         sentAt: time.getTime()
@@ -554,6 +557,7 @@ const PostView = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'comment-tag', 
+                            taggedBy: userAuth,
                             value: id, 
                             postId: postId,
                             sentAt: time.getTime()

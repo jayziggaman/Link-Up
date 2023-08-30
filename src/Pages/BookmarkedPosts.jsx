@@ -24,8 +24,8 @@ const BookmarkedPosts = () => {
   useEffect(() => {
     return () => {
       const main = document.querySelector('main')
-      const allVideos = main.querySelectorAll('video')
-      allVideos.forEach(video => video.pause())
+      const allVideos = main?.querySelectorAll('video')
+      allVideos?.forEach(video => video.pause())
     }
   }, [])
 
@@ -41,27 +41,34 @@ const BookmarkedPosts = () => {
 
     for (let i = 0; i < user?.postSaves.value.length; i++) {
       if (user?.postSaves.value[i].type === 'post') {
-        arr.push({
-          type: 'post',
-          value: allPosts.find(post => post.id === user?.postSaves.value[i].postId)
-        })
+        const post = allPosts.find(post => post.id === user?.postSaves.value[i].postId)
+        if (post) {
+          arr.push({
+            type: 'post',
+            value: post
+          })
+        }
 
       } else if (user?.postSaves.value[i].type === 'comment') {
         const post = allPosts.find(post => post.id === user?.postSaves.value[i].postId)
         const comment = post.comments.value.find(comment => comment.id === user?.postSaves.value[i].commentId)
-        arr.push({
-          type: 'comment',
-          value: {post, comment}
-        })
+        if (post && comment) {
+          arr.push({
+            type: 'comment',
+            value: {post, comment}
+          })
+        }
 
       } else if (user?.postSaves.value[i].type === 'reply') {
         const post = allPosts.find(post => post.id === user?.postSaves.value[i].postId)
         const comment = post?.comments.value.find(comment => comment.id === user?.postSaves.value[i].commentId)
         const reply = comment?.replies.value.find(reply => reply.id === user?.postSaves.value[i].replyId)
-        arr.push({
-          type: 'reply',
-          value: {post, comment, reply}
-        })
+        if (post && comment && reply) {
+          arr.push({
+            type: 'reply',
+            value: {post, comment, reply}
+          })
+        }
       }
     }
     setPosts(arr)

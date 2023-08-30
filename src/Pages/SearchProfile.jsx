@@ -182,8 +182,11 @@ const SearchProfile = () => {
 
           }  else if (btn.textContent === 'Likes') {
             let arr = []
-            for(let i = 0; i < currentUserPage?.likes.value.length; i++) {
-              arr.push(allPosts.find(post => post.id === currentUserPage?.likes.value[i]))
+            for (let i = 0; i < currentUserPage?.likes.value.length; i++) {
+              const like = allPosts.find(post => post.id === currentUserPage?.likes.value[i])
+              if (like) {
+                arr.push(like)
+              }
             }
             setPostTypeArr(arr)
           } 

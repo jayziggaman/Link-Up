@@ -208,6 +208,7 @@ const ReplyReplyForm = () => {
                     value: [...user.notifications.value, {
                       id: notiId,
                       type: 'reply-tag', 
+                      taggedBy: userAuth,
                       value: id, 
                       postId: postId,
                       commentId: commentId,
@@ -232,7 +233,7 @@ const ReplyReplyForm = () => {
                   type: 'reply-reply',
                   value: replyId,
                   commentId: commentId,
-                  postid: postId,
+                  postId: postId,
                   repliedBy: userAuth,
                   sentAt: time.getTime()
                 }]
@@ -291,6 +292,7 @@ const ReplyReplyForm = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'reply-tag', 
+                            taggedBy: userAuth,
                             value: id, 
                             postId: postId,
                             commentId: commentId,
@@ -318,7 +320,7 @@ const ReplyReplyForm = () => {
                         type: 'reply-reply',
                         value: replyId,
                         commentId: commentId,
-                        postid: postId,
+                        postId: postId,
                         repliedBy: userAuth,
                         sentAt: time.getTime()
                       }]
@@ -365,6 +367,7 @@ const ReplyReplyForm = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'reply-tag', 
+                            taggedBy: userAuth,
                             value: id, 
                             postId: postId,
                             commentId: commentId,
@@ -392,7 +395,7 @@ const ReplyReplyForm = () => {
                         type: 'reply-reply',
                         value: replyId,
                         commentId: commentId,
-                        postid: postId,
+                        postId: postId,
                         repliedBy: userAuth,
                         sentAt: time.getTime()
                       }]
@@ -458,6 +461,7 @@ const ReplyReplyForm = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'reply-tag', 
+                            taggedBy: userAuth,
                             value: id, 
                             postId: postId,
                             commentId: commentId,
@@ -485,7 +489,7 @@ const ReplyReplyForm = () => {
                         type: 'reply-reply',
                         value: replyId,
                         commentId: commentId,
-                        postid: postId,
+                        postId: postId,
                         repliedBy: userAuth,
                         sentAt: time.getTime()
                       }]

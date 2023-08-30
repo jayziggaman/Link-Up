@@ -17,7 +17,10 @@ const BookmarkedPages = () => {
   useEffect(() => {
     const arr = []
     for (let i = 0; i < user?.pageSaves.value.length; i++) {
-      arr.push(users.find(person => person.id === user?.pageSaves.value[i]))
+      const person = users.find(person => person.id === user?.pageSaves.value[i])
+      if (person) {
+        arr.push(person)
+      }
     }
     setBookmarks(arr)
   }, [user])

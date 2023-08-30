@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { appContext } from '../App'
 import verifiedBadge from '../Images/verified-badge.jpg'
 
 const Notification = ({ noti }) => {
-  const { users, allPosts, userAuth, storyType, followStory } = useContext(appContext)
+  const { users, allPosts, userAuth, storyType, followStory, user } = useContext(appContext)
   const [diff, setDiff] = useState()
 
   const time = new Date()
+  const location = useLocation()
 
   useEffect(() => {
     if (noti) {
@@ -18,7 +19,7 @@ const Notification = ({ noti }) => {
 
   if (noti.type === 'post-tag') {
     const post = allPosts.find(post => post.id === noti.value)
-    const creator = users.find(user => user.id === post?.creator)
+    const creator = users.find(user => user.id === noti.taggedBy)
     if (creator?.id !== userAuth) {
       return (
         <div className='notification' >
@@ -44,7 +45,8 @@ const Notification = ({ noti }) => {
     
   } else if (noti.type === 'comment-tag') {
     const post = allPosts.find(post => post.id === noti.postId)
-    const creator = users.find(user => user.id === post?.creator)
+    const comment = post.comments.value.find(comment => comment.id === noti.value)
+    const creator = users.find(user => user.id === noti?.taggedBy)
     if (creator.id !== userAuth) {
       return (
         <div className='notification' >
@@ -52,7 +54,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -70,8 +72,10 @@ const Notification = ({ noti }) => {
     }
 
   } else if (noti.type === 'reply-tag') {
-    const post = allPosts.find(post => post.id === noti.value)
-    const creator = users.find(user => user.id === post?.creator)
+    const post = allPosts.find(post => post.id === noti.postId)
+    const comment = post.comments.value.find(comment => comment.id === noti.commentId)
+    const reply = comment.replies.value.find(reply => reply.id === noti.value)
+    const creator = users.find(user => user.id === noti?.taggedBy)
     if (creator.id !== userAuth) {
       return (
         <div className='notification'>
@@ -79,7 +83,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}/replies/${reply?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -124,7 +128,8 @@ const Notification = ({ noti }) => {
     }
     
   } else if (noti.type === 'comment-like') {
-    const post = allPosts.find(post => post.id === noti.value)
+    const post = allPosts.find(post => post.id === noti.postId)
+    const comment = post.comments.value.find(comment => comment.id === noti.value)
     const creator = users.find(user => user.id === noti.likedBy)
     if (noti.likedBy !== userAuth) {
       return (
@@ -133,7 +138,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator?.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -151,7 +156,9 @@ const Notification = ({ noti }) => {
     }
     
   } else if (noti.type === 'reply-like') {
-    const post = allPosts.find(post => post.id === noti.value)
+    const post = allPosts.find(post => post.id === noti.postId)
+    const comment = post.comments.value.find(comment => comment.id === noti.commentId)
+    const reply = comment.replies.value.find(reply => reply.id === noti.value)
     const creator = users.find(user => user.id === noti.likedBy)
     if (noti.likedBy !== userAuth) {
       return (
@@ -160,7 +167,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}/replies/${reply?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator?.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -205,7 +212,8 @@ const Notification = ({ noti }) => {
     }
 
   } else if (noti.type === 'comment-reply') {
-    const post = allPosts.find(post => post.id === noti.value)
+    const post = allPosts.find(post => post.id === noti.postId)
+    const comment = post.comments.value.find(comment => comment.id === noti.value)
     const creator = users.find(user => user.id === noti.repliedBy)
     if (noti.repliedBy !== userAuth) {
       return (
@@ -214,7 +222,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator?.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -232,7 +240,9 @@ const Notification = ({ noti }) => {
     }
 
   } else if (noti.type === 'reply-reply') {
-    const post = allPosts.find(post => post.id === noti.value)
+    const post = allPosts.find(post => post.id === noti.postId)
+    const comment = post.comments.value.find(comment => comment.id === noti.commentId)
+    const reply = comment.replies.value.find(reply => reply.id === noti.value)
     const creator = users.find(user => user.id === noti.repliedBy)
     if (noti.repliedBy !== userAuth) {
       return (
@@ -241,7 +251,7 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/post/${post?.id}`}>
+          <Link to={`/post/${post?.id}/comments/${comment?.id}/replies/${reply?.id}`}>
             <b>
               {`@${creator?.username} `}
               {creator?.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />}
@@ -267,7 +277,10 @@ const Notification = ({ noti }) => {
             <img src={creator?.avatarUrl} alt="" />
           </Link>
     
-          <Link to={`/stories/${creator?.username}/${noti.value}`}  onClick={() => {
+          <Link
+            to={`/f/stories/${creator?.username}/${noti.value}`}
+            state={{ url: location.pathname, user: user }}
+            onClick={() => {
             storyType.current = 'following'
             followStory.current = creator.id
           }}>

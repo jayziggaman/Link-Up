@@ -200,6 +200,7 @@ const Form = () => {
                     value: [...user.notifications.value, {
                       id: notiId,
                       type: 'post-tag', 
+                      taggedBy: userAuth,
                       value: docRef.id, 
                       sentAt: time.getTime()
                     }]
@@ -262,6 +263,7 @@ const Form = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'post-tag', 
+                            taggedBy: userAuth,
                             value: docRef.id, 
                             sentAt: time.getTime()
                           }]
@@ -314,6 +316,7 @@ const Form = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'post-tag', 
+                            taggedBy: userAuth,
                             value: docRef.id, 
                             sentAt: time.getTime()
                           }]
@@ -381,6 +384,7 @@ const Form = () => {
                           value: [...user.notifications.value, {
                             id: notiId,
                             type: 'post-tag', 
+                            taggedBy: userAuth,
                             value: docRef.id, 
                             sentAt: time.getTime()
                           }]
