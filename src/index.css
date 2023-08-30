@@ -1,0 +1,7096 @@
+:root {
+  --dm-border: rgb(56, 55, 55);
+  --light-mode-bgc: rgb(235, 235, 238);
+}
+
+/* body {
+  max-width: 1500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+body.dark-mode {
+  background-color: black;
+  color: #fff;
+}
+
+svg {
+  color: black;
+}
+
+.App.dark-mode svg {
+  color: gainsboro;
+}
+
+.App {
+  min-width: 350px;
+  max-width: 1500px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background-color: white;
+  color: black;
+  position: relative;
+}
+
+.App.dark-mode {
+  background-color: black;
+  color: #fff;
+}
+
+button {
+  color: black;
+}
+
+.App.dark-mode button {
+  color: gainsboro;
+}
+
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.verified-message-div {
+  position: fixed;
+  bottom: 3.5rem;
+  right: 10px;
+  height: 70px;
+  width: 300px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  z-index: 100;
+  background-color: #fff;
+  border: 1px solid gray;
+  padding: 10px;
+  transform: translateY(300px);
+  visibility: hidden;
+  cursor: pointer;
+  transition: all 450ms ease-in;
+}
+
+.App.dark-mode .verified-message-div {
+  background-color: black;
+  color: white;
+  border: 1px solid var(--dm-border);
+}
+
+.verified-message-div p {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  /* letter-spacing: -1px; */
+}
+
+.processing-div {
+  position: fixed;
+  top: 20px;
+  right: 50%;
+  width: 60%;
+  min-width: 250px;
+  max-width: 500px;
+  background-color: white;
+  height: 40px;
+  border-radius: 5px;
+  z-index: 105;
+  border: 1px solid gainsboro;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(50%) translateY(-100px);
+  transition: all 450ms ease-in;
+}
+
+.App.dark-mode .processing-div {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+  color: #fff;
+}
+
+.processing {
+  transform: translateX(50%) translateY(0);
+}
+
+.processing-div p {
+  font-weight: bold;
+}
+
+input:focus {
+  outline: none;
+}
+
+textarea {
+  resize: none;
+}
+
+textarea:focus {
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+svg {
+  cursor: pointer;
+}
+
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.out-link {
+  color: rgb(18, 18, 241);
+  text-decoration: underline;
+}
+
+.App.dark-mode .out-link {
+  color: rgb(86, 86, 254);
+  text-decoration: underline;
+}
+
+.global-error {
+  color: rgb(182, 9, 9);
+  position: fixed;
+  top: 2rem;
+  right: 2%;
+  width: 85%;
+  max-width: 450px;
+  border-radius: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  visibility: hidden;
+  z-index: -100;
+  text-align: center;
+  background-color: #fff;
+  transform: translateX(-9000px);
+  border: 1px solid gainsboro;
+  /* border-radius: 5px; */
+  padding: 20px;
+
+}
+
+.App.dark-mode .global-error {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.share-menu,
+.story-share-menu {
+  position: fixed;
+  border-radius: 10px;
+  top: 100px;
+  bottom: 7px;
+  transform: translateY(1500px);
+  right: 2vw;
+  padding: 10px;
+  width: 95vw;
+  max-width: 600px;
+  border: 1px solid gainsboro;
+  box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.8);
+  transition: all 450ms ease-in;
+}
+
+.share-menu {
+  background-color: #fff;
+  color: black;
+}
+
+.story-share-menu {
+  background-color: black;
+  color: gainsboro;
+  border: var(--dm-border);
+}
+
+.App.dark-mode .share-menu,
+.App.dark-mode .story-share-menu {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.share-menu-search {
+  width: 85%;
+  border: 1px solid gainsboro;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+.story-share-menu .share-menu-search {
+  background-color: var(--dm-border);
+  border: var(--dm-border);
+}
+
+.story-share-menu input {
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.story-share-menu button {
+  background-color: transparent;
+}
+
+.story-share-menu button svg {
+  color: gainsboro;
+}
+
+.story-share-menu ::-webkit-scrollbar {
+  background-color: var(--dm-border);
+}
+
+.story-share-menu ::-webkit-scrollbar-thumb {
+  background-color: gray;
+}
+
+.story-share-menu .selected-friends {
+  border-bottom: 1px solid var(--dm-border);
+  border-top: 1px solid var(--dm-border);
+}
+
+.story-share-menu .friends-list {
+  color: gainsboro;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.story-share-menu .search-result-username {
+  color: gainsboro;
+}
+
+.App.dark-mode .share-menu-search {
+  border: 1px solid var(--dm-border);
+}
+
+.share-menu-search svg {
+  color: gray;
+  margin-right: 7px;
+}
+
+.share-menu-search input {
+  border: none;
+  width: 100%;
+}
+
+.App.dark-mode .share-menu-search input {
+  background-color: black;
+  color: gainsboro;
+}
+
+.friends-list {
+  height: 60px;
+  color: black;
+  text-decoration: none;
+  display: flex;
+  border-bottom: 1px solid gainsboro;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.story-viewers {
+  min-height: 30px;
+  max-height: 500px;
+  width: 300px;
+  position: fixed;
+  border: 1px solid var(--dm-border);
+  bottom: 0px;
+  left: 5px;
+  z-index: 10;
+  background-color: black;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  padding: 10px;
+  overflow-y: scroll;
+  color: white;
+  transition: all 450ms ease-in;
+  z-index: 1000;
+}
+
+.views-icon {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--dm-border);
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  background-color: black;
+  z-index: 10;
+  padding: 5px 5px 5px;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.views-icon span {
+  margin-right: 75px;
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+}
+
+.views-icon>svg {
+  margin-left: 10px;
+}
+
+.views-icon svg {
+  color: gainsboro;
+}
+
+.story-viewers .friends-list:first-child {
+  margin-top: 15px;
+}
+
+.story-verified-badge {
+  height: 15px;
+  width: 15px;
+  margin-left: 5px;
+  border-radius: 10px;
+}
+
+.story-viewers .friends-list {
+  border-bottom: 1px solid var(--dm-border);
+  height: auto;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+
+.story-viewers .friends-list .search-result-img-div {
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-viewers .friends-list .search-result-img-div img {
+  height: 30px;
+  width: 30px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.story-viewers .friends-list .search-result-username {
+  color: white;
+  font-size: 14px;
+}
+
+.App.dark-mode .friends-list {
+  color: gainsboro;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.selected-friends {
+  height: 70px;
+  border-top: 1px solid gainsboro;
+  border-bottom: 1px solid gainsboro;
+  margin: 5px 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+.App.dark-mode .selected-friends {
+  border-top: 1px solid var(--dm-border);
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.selected-friends>div {
+  height: 50px;
+  width: 50px;
+  position: relative;
+  margin-right: 20px;
+}
+
+.selected-friends>div img {
+  height: 100%;
+  width: 100%;
+  border-radius: 25px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.selected-friends>div>div {
+  border: 2px solid gray;
+  width: 25px;
+  height: 25px;
+  border-radius: 15px;
+  position: absolute;
+  top: -5px;
+  background-color: gainsboro;
+  right: -5px;
+  cursor: pointer;
+}
+
+.selected-friends>div>div div:nth-child(1) {
+  border: 1px solid rgb(32, 32, 32);
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 10px;
+  transform: rotateZ(40deg);
+  transition: all 350ms linear;
+}
+
+.selected-friends>div>div div:nth-child(2) {
+  border: 1px solid rgb(32, 32, 32);
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  right: 10px;
+  transform: rotateZ(135deg);
+  transition: all 350ms linear;
+}
+
+.share-send-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  height: 40px;
+  width: 40px;
+  font-size: 1.2rem;
+  border-radius: 20px;
+  border: none;
+  background-color: inherit;
+}
+
+.App.dark-mode .share-send-btn {
+  color: gainsboro;
+}
+
+.new-post-icon {
+  z-index: 100;
+  position: fixed;
+  bottom: 70px;
+  right: 30px;
+  height: 50px;
+  width: 50px;
+  border-radius: 25px;
+  border: 1px solid gray;
+  background-color: #fff;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.App.dark-mode .new-post-icon {
+  background-color: black;
+  color: white;
+}
+
+.new-post-form {
+  position: fixed;
+  border-radius: 10px;
+  z-index: -100;
+  top: 6rem;
+  bottom: 20px;
+  right: 15px;
+  width: 94%;
+  max-width: 450px;
+  background-color: #fff;
+  box-shadow: -2px -2px 10px rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  transform: translateY(650px);
+  visibility: hidden;
+  display: grid;
+  grid-template-rows: 40px 1fr 50px;
+  transition: all 350ms linear;
+}
+
+.App.dark-mode .new-post-form {
+  background-color: black;
+  color: #fff;
+  border: 1px solid var(--dm-border);
+}
+
+.post-number {
+  position: absolute;
+  right: 10px;
+  top: 80px;
+  background-color: var(--dm-border);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-size: 12px;
+  z-index: 1;
+}
+
+.scroll-posts button {
+  height: 30px;
+  width: 30px;
+  border-radius: 20px;
+  font-size: 15px;
+  border: 1px solid gray;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.App.dark-mode .scroll-posts button {
+  background-color: black;
+  color: white;
+}
+
+.new-post-btn-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding-right: 10px;
+}
+
+.new-post-btn-div input {
+  display: none;
+}
+
+.new-post-btn-div span {
+  padding: 3px 7px;
+}
+
+.new-post-btn-div button,
+.new-post-btn-div span {
+  background-color: inherit;
+  height: 32px;
+  width: 32px;
+  border: 1px solid gainsboro;
+  border-radius: 4px;
+  font-size: 1.3rem;
+  transition: all 350ms linear;
+  cursor: pointer;
+}
+
+.App.dark-mode .new-post-btn-div button,
+.App.dark-mode .new-post-btn-div span {
+  border: 1px solid var(--dm-border);
+}
+
+.App.dark-mode .new-post-btn-div button {
+  background-color: black;
+  color: gainsboro;
+}
+
+.new-post-btn-div button:active {
+  transform: scale(120%);
+}
+
+.textarea-div {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.App.dark-mode .textarea-div,
+.App.dark-mode .textarea-div textarea,
+.App.dark-mode .textarea-div textarea::placeholder {
+  background-color: black;
+  color: #fff;
+}
+
+.App.dark-mode .textarea-div textarea {
+  border: 1px solid var(--dm-border);
+}
+
+#media-post-cap {
+  width: 100%;
+  padding: 5px;
+  margin-top: -15px;
+  height: 60px;
+  border: 1px solid gainsboro;
+  max-width: 650px;
+  border-radius: 5px;
+}
+
+.media-post-cap {
+  width: 100%;
+  padding: 5px;
+  margin-top: 10px;
+  height: 60px;
+  border: 1px solid gainsboro;
+  max-width: 650px;
+  border-radius: 5px;
+}
+
+.post-media-processing-overlay {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  height: 345px;
+  background-color: white;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.App.dark-mode .post-media-processing-overlay {
+  background-color: black;
+}
+
+.post-media-processing-video {
+  height: 10%;
+  width: 10%;
+  margin-top: 32%;
+  margin-left: 42%;
+}
+
+.new-img-post,
+.new-img-reply,
+.new-img-reply-reply,
+.img-story {
+  height: 350px;
+  object-fit: contain;
+  max-width: 100%;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+}
+
+.App.dark-mode .new-img-post,
+.App.dark-mode .new-img-reply,
+.App.dark-mode .new-img-reply-reply,
+.App.dark-mode .img-story {
+  border: 1px solid var(--dm-border);
+}
+
+.multiple-media-div {
+  height: 350px;
+  width: 100%;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid gainsboro;
+}
+
+.App.dark-mode .multiple-media-div {
+  border: 1px solid var(--dm-border);
+}
+
+.multiple-media-div .new-img-post {
+  border: none;
+}
+
+.media {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+
+.new-vid-post,
+.new-vid-reply,
+.new-vid-reply-reply,
+.vid-story {
+  height: 350px;
+  object-fit: contain;
+  max-width: 100%;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+}
+
+.App.dark-mode .new-vid-post,
+.App.dark-mode .new-vid-reply,
+.App.dark-mode .new-vid-reply-reply,
+.App.dark-mode .vid-story {
+  border: 1px solid var(--dm-border);
+}
+
+#new-post-text {
+  width: 100%;
+  height: 100%;
+  border: 1px solid gainsboro;
+  padding: 10px 5px;
+  max-width: 650px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.App.dark-mode #new-post-text {
+  border: 1px solid var(--dm-border);
+}
+
+.new-post-form textarea::placeholder {
+  font-size: 17px;
+  opacity: 0.6;
+}
+
+.auth-main,
+.sign-up-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.sign-up-main {
+  height: 100px;
+  flex-direction: column;
+  transform: translateY(300%);
+  visibility: hidden;
+  z-index: -100;
+  position: fixed;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: #fff;
+  border: 1px solid gainsboro;
+  bottom: 0;
+  box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.7);
+  transition: all 450ms linear;
+}
+
+.sign-up-main a {
+  color: blue;
+}
+
+.App.dark-mode .sign-in-form {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.auth-main .story-cancel {
+  position: fixed;
+  top: 0;
+  right: 20px;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.sign-in-method-pick button {
+  display: block;
+  padding: 10px 30px;
+  margin-top: 20px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  transition: all 350ms linear;
+}
+
+.App.dark-mode .sign-in-method-pick button {
+  background-color: white;
+  color: black;
+}
+
+.sign-in-method-pick button:active {
+  transform: scale(110%);
+}
+
+.sign-in-method-pick span {
+  font-size: 11px;
+  width: 100vw;
+  margin-left: 27px;
+  opacity: 0.6;
+}
+
+.auth-form-div {
+  position: relative;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  visibility: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form-div>button {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  font-size: 1.2rem;
+}
+
+.App.dark-mode .auth-form-div>button {
+  background-color: #fff;
+}
+
+.auth-form {
+  background-color: #fff;
+  width: 80%;
+  max-width: 650px;
+  border: 1px solid gainsboro;
+  height: 400px;
+  padding: 20px;
+  position: relative;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.App.dark-mode .auth-form {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+  color: gainsboro;
+}
+
+.text-input {
+  display: block;
+  width: 100%;
+  padding: 10px 5px;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  border: none;
+  border-bottom: 1px solid gainsboro;
+  border-radius: 2px;
+}
+
+.App.dark-mode .text-input {
+  background-color: var(--dm-border);
+  border: none;
+}
+
+.auth-form div {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.form-check input {
+  display: inline;
+  border-radius: 2px;
+  margin-right: 5px;
+}
+
+.auth-form label {
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+.auth-form input:focus {
+  outline: none;
+}
+
+.auth-form button {
+  background-color: black;
+  color: white;
+  padding: 7px 15px;
+  border-radius: 4px;
+  position: absolute;
+  bottom: 15px;
+  left: 25px;
+  transition: all 400ms linear;
+}
+
+.App.dark-mode .auth-form button {
+  background-color: #fff;
+  color: black;
+}
+
+.auth-form button:hover {
+  opacity: 0.8;
+}
+
+.auth-form button:active {
+  transform: scale(110%);
+}
+
+.sign-in-form {
+  position: fixed;
+  z-index: 10;
+  top: 3rem;
+  border: 1px solid gainsboro;
+  background-color: #fff;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  right: 5%;
+  width: 90%;
+  bottom: 0;
+  max-width: 500px;
+  box-shadow: 2px -5px 10px rgba(0, 0, 0, 0.7);
+  z-index: -100;
+  transform: translateY(1600px);
+  transition: all 350ms linear;
+}
+
+.App.dark-mode .sign-in-form {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.file-input-label {
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.file-input-label-div {
+  cursor: pointer;
+  position: relative;
+  border: 1px solid gainsboro;
+  height: 120px;
+  width: 120px;
+  border-radius: 60px;
+}
+
+.App.dark-mode .file-input-label-div {
+  border: 1px solid var(--dm-border);
+}
+
+.file-input-label-div img {
+  width: 100%;
+  height: 100%;
+  border-radius: 60px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.file-input-label span {
+  padding: 10px 12px;
+  border-radius: 20px;
+  border: 1px solid gainsboro;
+  position: absolute;
+  left: 80px;
+  top: 90px;
+  z-index: 10;
+  background-color: white;
+}
+
+.App.dark-mode .file-input-label span {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.file-input-label span:active {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.file-input {
+  margin-top: 10px;
+  display: none;
+}
+
+.sign-in-form input {
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.App.dark-mode .sign-in-form input {
+  background-color: var(--dm-border);
+  border: none;
+  color: gainsboro;
+}
+
+.media-processing-overlay {
+  position: absolute;
+  height: 120px;
+  width: 120px;
+}
+
+.media-processing-video {
+  margin-top: 25%;
+  margin-left: 26%;
+  height: 50%;
+  width: 50%;
+}
+
+.edit-profile-form>button {
+  display: block;
+  margin-top: 10px;
+}
+
+.App.dark-mode .edit-profile-form>button {
+  background-color: black;
+  color: gainsboro;
+  border: 1px solid var(--dm-border);
+}
+
+.home-main {
+  margin-top: 3rem;
+  min-height: 92vh;
+  width: 100vw;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  height: 100%;
+  position: fixed;
+  visibility: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.home-header {
+  /* background-color: rgb(141, 116, 85); */
+  background-color: white;
+  color: black;
+  display: grid;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 3rem;
+  grid-template-columns: 4rem 1fr;
+  padding: 0 20px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  align-items: center;
+  justify-items: center;
+}
+
+.App.dark-mode .home-header {
+  background-color: black;
+  color: #fff;
+  border-bottom: 1px solid rgb(56, 55, 55);
+}
+
+.pfp-div {
+  height: 3rem;
+  width: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pfp-div img {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 1.5rem;
+  object-fit: cover;
+  object-position: top;
+}
+
+.app-title-div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+  padding-left: 30%;
+}
+
+.story-layout {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--dm-border);
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: 50px 1fr;
+}
+
+.story-options {
+  height: 50px;
+  margin-bottom: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  color: #fff;
+  margin: 0 auto;
+  /* border: 1px solid wheat; */
+}
+
+.story-cancel {
+  width: 100px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.story-cancel div {
+  height: 25px;
+  width: 3px;
+  background-color: white;
+  display: inline-block;
+  border-radius: 10px;
+}
+
+.story-cancel div:first-child {
+  margin-left: 5px;
+  transform: rotateZ(40deg);
+}
+
+.story-cancel div:nth-child(2) {
+  margin-left: -2.5px;
+  transform: rotateZ(135deg);
+}
+
+.add-story {
+  border: 1px solid gainsboro;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+}
+
+.add-story svg {
+  color: gainsboro;
+}
+
+.story-content {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 600px;
+  height: 95%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.story-content>button {
+  height: auto;
+  font-size: 25px;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  border: none;
+  margin: auto auto;
+  color: rgba(0, 0, 0, 0.8);
+  background-color: gainsboro;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  z-index: 100;
+}
+
+.App.dark-mode .story-content>button {
+  background-color: black;
+  color: white;
+  border: 1px solid var(--dm-border);
+}
+
+.story-content>button:first-child {
+  left: 10px;
+}
+
+.story-content>button:last-child {
+  right: 10px;
+}
+
+.story-details {
+  border-radius: 10px;
+  position: relative;
+  height: 100%;
+  width: 90%;
+  display: grid;
+  grid-template-rows: 70px 1fr;
+  background-color: black;
+}
+
+@media(min-width: 601px) {
+  .share-story-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 30px;
+    background-color: transparent;
+    border: none;
+    font-size: 18px;
+  }
+}
+
+.share-story-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 0;
+  width: 30px;
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+}
+
+.share-story-btn svg {
+  background-color: transparent;
+  color: whitesmoke;
+}
+
+.story-details .media-input-div {
+  left: 20px;
+  background-color: black;
+  color: gainsboro;
+}
+
+.story-details .media-input-div textarea {
+  left: 20px;
+  background-color: black;
+  color: gainsboro;
+}
+
+.story-reply-form {
+  position: absolute;
+  z-index: 100;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  display: grid;
+  grid-template-columns: 30px 1fr 40px;
+  height: 30px;
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.story-reply-form label {
+  border: 1px solid var(--dm-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border-radius: 5px;
+}
+
+#story-reply-media-input {
+  display: none;
+}
+
+.story-reply-form input {
+  border-radius: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+  background-color: var(--dm-border);
+  border: none;
+  color: gainsboro;
+  padding: 3px 10px;
+}
+
+.story-reply-form button {
+  border-radius: 5px;
+  background-color: var(--dm-border);
+  color: gainsboro;
+  border: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-plus-one,
+.story-minus-one {
+  position: absolute;
+  top: 70px;
+  bottom: 0;
+  z-index: 100;
+}
+
+.story-plus-one button,
+.story-minus-one button {
+  font-size: 20px;
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  border: 1px solid gainsboro;
+  margin: auto auto;
+  color: rgba(0, 0, 0, 0.8);
+  background-color: white;
+  top: 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+}
+
+.App.dark-mode .story-plus-one button,
+.App.dark-mode .story-minus-one button {
+  border: 1px solid var(--dm-border);
+  color: #fff;
+  background-color: black;
+}
+
+.story-plus-one button {
+  right: 2px;
+}
+
+.story-minus-one button {
+  left: 2px;
+}
+
+@media(max-width: 500px) {
+
+  .story-plus-one button,
+  .story-minus-one button {
+    display: none;
+  }
+}
+
+.story-plus-one {
+  right: 0;
+  bottom: 30px;
+  width: 80%;
+}
+
+.story-minus-one {
+  bottom: 30px;
+  left: 0;
+  width: 20%;
+}
+
+.story-abs {
+  /* position: absolute; */
+  /* top: 5px; */
+  /* left: 0; */
+  /* right: 0; */
+  height: 70px;
+  width: 100%;
+  padding: 5px;
+  color: white;
+  background-color: inherit;
+  z-index: 10;
+  border-radius: 5px;
+}
+
+.story-abs span {
+  display: flex;
+  align-items: center;
+}
+
+.story-abs .verified-badge {
+  height: 12px;
+  width: 12px;
+  border-radius: 10px;
+  align-self: center;
+  margin-top: 5px;
+}
+
+.story-abs button {
+  border: none;
+}
+
+.story-amt {
+  width: 100%;
+  display: flex;
+  gap: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.story-amt div {
+  width: 100%;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 20px;
+}
+
+#curr {
+  height: 4px;
+}
+
+.story-pfp-username {
+  /* border: 1px solid white; */
+  padding: 2px 5px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.story-pfp-username img {
+  width: 40px;
+  height: 40px;
+  border-radius: 25px;
+  margin-right: 10px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.name-time-opt {
+  /* border: 1px solid wheat; */
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.name-time-opt span {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.name-time-opt span span {
+  margin-left: 20px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.delete-btn-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  font-size: 20px;
+  color: white;
+  background-color: inherit;
+}
+
+.delete-btn svg {
+  color: gainsboro;
+}
+
+.story-content-div {
+  /* min-width: 300px;
+  max-width: 350px; */
+  height: 100%;
+  /* display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; */
+  display: grid;
+  grid-template-rows: 1fr 50px;
+  justify-items: center;
+  align-items: center;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  /* box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); */
+}
+
+.story-details pre {
+  padding: 10px;
+}
+
+.story-content-img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  border-bottom: none;
+  border-radius: 5px;
+}
+
+.story-content-vid {
+  width: 100%;
+  height: 100%;
+  max-height: 450px;
+  max-width: 100%;
+  object-fit: contain;
+  border-bottom: none;
+  border-radius: 5px;
+}
+
+.story-content-pre {
+  height: auto;
+  width: 100%;
+  padding: 10px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  /* background-color: white; */
+  color: whitesmoke;
+  border-top: none;
+  position: absolute;
+  bottom: 0;
+  height: auto;
+  font-size: 14px;
+}
+
+.stories {
+  width: 100%;
+  height: 100px;
+  border-top: 1px solid gainsboro;
+  border-bottom: 1px solid gainsboro;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+.App.dark-mode .stories {
+  border-top: 1px solid rgb(56, 55, 55);
+  border-bottom: 1px solid rgb(56, 55, 55);
+}
+
+.stories::-webkit-scrollbar {
+  height: 7px;
+}
+
+.stories::-webkit-scrollbar-thumb {
+  background-color: gray;
+}
+
+.story {
+  height: 100%;
+  width: 80px;
+  margin-right: 10px;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.story .verified-badge {
+  width: 12px;
+  height: 12px;
+  align-self: flex-end;
+}
+
+.empty-story {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-story div {
+  height: 65px;
+  width: 65px;
+  border-radius: 40px;
+}
+
+.empty-story p {
+  margin-top: 67px;
+  font-size: 12px;
+}
+
+.story p {
+  margin-top: 2px;
+  font-size: 12px;
+  align-self: center;
+}
+
+.story-indicator {
+  height: 60px;
+  width: 60px;
+  /* border: 2px solid ; */
+  border-radius: 50px;
+  padding: 2px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-overlay {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  top: 0;
+  bottom: 0;
+  border-radius: 30px;
+  left: 0;
+  right: 0;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.story-overlay svg {
+  color: gainsboro;
+}
+
+.story-indicator img {
+  height: 100%;
+  width: 100%;
+  border-radius: 40px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.posts-section {
+  min-height: 50vh;
+  /* max-height: auto; */
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 10px 0px 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.post-div {
+  width: 100%;
+}
+
+@media(min-width: 800px) {
+  .posts-section {
+    padding: 10px 0px 1rem;
+  }
+}
+
+hr {
+  width: 100%;
+  border: 0.005rem solid gainsboro;
+}
+
+.App.dark-mode hr {
+  width: 100%;
+  border: 0.005rem solid var(--dm-border);
+}
+
+.post,
+.comment-bookmark-post,
+.page-bookmark {
+  height: auto;
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: 50px 1fr 25px;
+}
+
+.upper-sect {
+  display: grid;
+  grid-template-columns: 1fr 25px;
+  color: black;
+  text-decoration: none;
+}
+
+.App.dark-mode .upper-sect a {
+  color: gainsboro;
+}
+
+.upper-sect a {
+  display: flex;
+  text-decoration: none;
+  color: black;
+}
+
+.upper-sect-options,
+.page-upper-sect-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  font-size: 30px;
+  width: 25px;
+  cursor: pointer;
+}
+
+.App.dark-mode .upper-sect-options {
+  color: gainsboro;
+}
+
+.options-div .upper-sect-options p,
+.page-upper-sect-options p {
+  width: 100%;
+  height: 270%;
+  align-self: center;
+}
+
+.upper-sect-options:active,
+.page-upper-sect-options:active {
+  background-color: gainsboro;
+  border-radius: 25px;
+}
+
+.App.dark-mode .upper-sect-options:active,
+.App.dark-mode .page-upper-sect-options:active {
+  background-color: var(--dm-border);
+}
+
+.upper-sect-img-div {
+  width: 50px;
+  height: 50px;
+}
+
+.upper-sect-img-div img {
+  height: 100%;
+  width: 100%;
+  border-radius: 25px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.post-username-div {
+  margin-left: 10px;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.post-username {
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(151, 151, 151);
+  margin-top: 2px;
+}
+
+.App.dark-mode .post-username {
+  color: rgb(115, 115, 115);
+}
+
+.post-username .verified-badge {
+  height: 12px;
+  width: 12px;
+  border: 6px;
+}
+
+.middle-sect {
+  /* margin-top: 10px; */
+  margin-bottom: 10px;
+  min-height: 30px;
+  height: auto;
+  width: 100%;
+}
+
+.in-link,
+.App.dark-mode .in-link {
+  text-decoration: none;
+  color: black;
+  height: auto;
+  width: 100%;
+  cursor: pointer;
+}
+
+.middle-sect pre {
+  height: auto;
+  white-space: pre-wrap;
+  line-height: 30px;
+}
+
+.img-post-body-div {
+  position: relative;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* margin-left: 60px; */
+}
+
+.img-post-body-div pre {
+  margin-bottom: 10px;
+  align-self: flex-start;
+}
+
+.group-media-div {
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.group-media-div .scroll-posts {
+  position: absolute;
+  width: 100%;
+}
+
+.group-media-div .post-number {
+  top: 10px;
+  z-index: 10;
+}
+
+.scroll-posts {
+  position: absolute;
+  top: 43%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.sample {
+  opacity: 0;
+  visibility: hidden;
+  min-height: auto;
+  max-height: 550px;
+  width: auto;
+}
+
+.group-media {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  transition: all 150ms ease-in;
+}
+
+
+.next-media {
+  transform: translateX(100%);
+}
+
+.curr-media {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.prev-media {
+  transform: translateX(-100%);
+}
+
+.img-post-body,
+.vid-post-body,
+.pv-vid-post-body {
+  min-height: 100px;
+  max-height: 400px;
+  height: 100%;
+  width: 100%;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1px solid gainsboro;
+  align-self: flex-end;
+  object-position: center;
+  justify-self: flex-end;
+}
+
+.App.dark-mode .img-post-body,
+.App.dark-mode .vid-post-body,
+.App.dark-mode .pv-vid-post-body {
+  border: 1px solid var(--dm-border);
+}
+
+.img-post-body,
+.vid-post-body {
+  aspect-ratio: 1 / 2;
+}
+
+.App.dark-mode .img-post-body,
+.App.dark-mode .vid-post-body {
+  border: 1px solid var(--dm-border);
+}
+
+.lower-sect {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.lower-sect a {
+  color: black;
+  text-decoration: none;
+}
+
+.App.dark-mode .lower-sect a {
+  color: gainsboro;
+}
+
+.post-time {
+  color: gray;
+  opacity: 0.8;
+  font-size: 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.post-time span {
+  margin-top: 5px;
+}
+
+.lower-sect span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.lower-sect span svg {
+  margin-right: 3px;
+  cursor: pointer;
+}
+
+.messages-main {
+  margin-top: -50px;
+  min-height: 94vh;
+  max-height: auto;
+}
+
+.new-chat-form {
+  position: fixed;
+  border-radius: 10px;
+  z-index: -100;
+  top: 8.5rem;
+  bottom: 200px;
+  right: 25px;
+  width: 94%;
+  max-width: 450px;
+  background-color: #fff;
+  box-shadow: -2px -2px 10px rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  transform: translateY(650px);
+  visibility: hidden;
+  display: grid;
+  grid-template-rows: 40px 1fr 30px;
+  transition: all 350ms linear;
+}
+
+.App.dark-mode .new-chat-form {
+  background-color: black;
+  color: gainsboro;
+}
+
+.new-chat-form textarea::placeholder {
+  font-size: 16px;
+}
+
+.new-dm-users-list {
+  position: fixed;
+  bottom: 0;
+  top: 4rem;
+  right: 20px;
+  width: 500px;
+  background-color: #fff;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  box-shadow: -2px -2px 10px rgba(0, 0, 0, 0.7);
+  z-index: -100;
+  visibility: hidden;
+  transform: translateY(1000px);
+  transition: all 450ms ease-in;
+
+}
+
+.App.dark-mode .new-dm-users-list {
+  background-color: black;
+}
+
+.new-dm-users-list-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+  overflow-y: scroll;
+  padding-top: 45px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.input-cancel-btn {
+  position: fixed;
+  display: grid;
+  grid-template-columns: 70px 1fr 80px;
+  height: 35px;
+  top: 10px;
+  width: calc(500px - 20px);
+  right: 10px;
+}
+
+.input-cancel-btn input {
+  margin-left: 10px;
+  margin-right: 10px;
+  border-radius: 20px;
+  border: 1px solid gainsboro;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.input-cancel-btn button {
+  border-radius: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  border: none;
+  font-size: 16px;
+  background-color: whitesmoke;
+}
+
+.App.dark-mode .input-cancel-btn input {
+  border: 1px solid var(--dm-border);
+  background-color: var(--dm-border);
+}
+
+.App.dark-mode .input-cancel-btn button {
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.App.dark-mode .input-cancel-btn button.red {
+  color: red;
+}
+
+.new-dm-selected-users {
+  border: 1px solid gainsboro;
+  margin-top: 10px;
+  height: 80px;
+  padding: 10px 5px;
+  display: flex;
+  border-radius: 5px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  width: auto;
+}
+
+.App.dark-mode .new-dm-selected-users {
+  border: 1px solid var(--dm-border);
+}
+
+.new-dm-selected-users-div {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin-right: 10px;
+}
+
+.new-dm-selected-users img {
+  height: 60px;
+  width: 60px;
+  border-radius: 35px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.new-dm-selected-users>div>div {
+  border: 2px solid gray;
+  width: 25px;
+  height: 25px;
+  border-radius: 15px;
+  position: absolute;
+  top: -5px;
+  background-color: gainsboro;
+  right: -5px;
+  cursor: pointer;
+}
+
+.new-dm-selected-users>div>div div:nth-child(1) {
+  border: 1px solid rgb(32, 32, 32);
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 10px;
+  transform: rotateZ(40deg);
+  transition: all 350ms linear;
+}
+
+.new-dm-selected-users>div>div div:nth-child(2) {
+  border: 1px solid rgb(32, 32, 32);
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  right: 10px;
+  transform: rotateZ(135deg);
+  transition: all 350ms linear;
+}
+
+.chat {
+  color: black;
+  text-decoration: none;
+  height: 70px;
+  width: 100%;
+  padding: 3px;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-bottom: 1px solid gainsboro;
+}
+
+.App.dark-mode .chat {
+  color: gainsboro;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.chat-pfp {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chat-pfp img {
+  height: 55px;
+  width: 55px;
+  border-radius: 30px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.has-read-indicator {
+  background-color: green;
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  border-radius: 25px;
+  bottom: 2px;
+  z-index: 100;
+  right: 25%;
+}
+
+.chat-username-recent-msg {
+  /* padding-top: 7px; */
+  text-decoration: none;
+  color: black;
+}
+
+.App.dark-mode .chat-username-recent-msg {
+  color: gainsboro;
+}
+
+.chat-username {
+  margin-top: 7px;
+  font-weight: 600;
+}
+
+.sign-in-form .chat-mrm {
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.chat-mrm {
+  font-size: 14px;
+  margin-top: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.chat-options-time {
+  height: 55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-options-time button {
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 30px;
+  background-color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-options-time button span {
+  font-size: 32px;
+  margin-top: -35px;
+}
+
+.chat-options-time button:active {
+  background-color: gainsboro;
+}
+
+.App.dark-mode .chat-options-time button:active {
+  background-color: var(--dm-border);
+}
+
+.chat-options-time p {
+  font-size: 0.7rem;
+}
+
+.App.dark-mode .chat-options-time p {
+  color: gainsboro;
+}
+
+.options-div,
+.other-options-div,
+.page-options-div {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: -100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+}
+
+.options-div div,
+.other-options-div div,
+.page-options-div div {
+  height: auto;
+  width: 200px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.App.dark-mode .options-div div,
+.App.dark-mode .other-options-div div,
+.App.dark-mode .page-options-div div {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.options-div button:last-child,
+.other-options-div button:last-child,
+.page-options-div button:last-child {
+  border-bottom: none;
+}
+
+.option {
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid gainsboro;
+  text-align: center;
+  border-radius: 5px;
+  width: 198px;
+  height: 45px;
+  background-color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.App.dark-mode .option {
+  color: gainsboro;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.comment-options-div,
+.other-comment-options-div {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: -100;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-options-div div,
+.other-comment-options-div div {
+  height: auto;
+  width: 220px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.App.dark-mode .comment-options-div div,
+.App.dark-mode .other-comment-options-div div,
+.App.dark-mode .reply-options-div div,
+.App.dark-mode .other-reply-options-div div {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.comment-options-div .option,
+.other-comment-options-div option {
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid gainsboro;
+  padding: 10px;
+  width: 100%;
+  height: 55px;
+  background-color: inherit;
+  display: flex;
+}
+
+.App.dark-mode .comment-options-div .option,
+.App.dark-mode .other-comment-options-div .option,
+.App.dark-mode .reply-options-div .option,
+.App.dark-mode .other-reply-options-div .option {
+  border-bottom: 1px solid var(--dm-border);
+  color: white;
+}
+
+.reply-options-div,
+.other-reply-options-div {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: -100;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reply-options-div div,
+.other-reply-options-div div {
+  height: auto;
+  width: 200px;
+  border-radius: 5px;
+  background-color: #fff;
+  margin: 30% auto;
+}
+
+.reply-options-div .option,
+.other-reply-options-div .option {
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid gainsboro;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  width: 100%;
+  height: 45px;
+  background-color: inherit;
+}
+
+.option span {
+  height: 100%;
+  width: 100%;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-main {
+  height: 100vh;
+}
+
+.search-header {
+  height: auto;
+  display: grid;
+  grid-template-columns: 1fr 50px;
+  padding: 10px 10px 5px;
+  border: none;
+}
+
+.search-bar-div {
+  width: 98%;
+  border-radius: 25px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  background-color: gainsboro;
+}
+
+.search-bar-div svg {
+  margin-right: 5px;
+  color: gray;
+}
+
+.search-bar-div input {
+  width: 98%;
+  height: 100%;
+  border: none;
+  background-color: gainsboro;
+}
+
+.App.dark-mode .search-bar-div,
+.App.dark-mode .search-bar-div input {
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.App.dark-mode .search-bar-div input::placeholder {
+  color: gray;
+}
+
+.search-bar-div input::placeholder {
+  color: black;
+}
+
+.search-bar-div input:focus {
+  outline: none;
+}
+
+.search-header-pfp-div {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-header-pfp-div img {
+  height: 100%;
+  width: 3rem;
+  border-radius: 1.5rem;
+  object-fit: cover;
+  object-position: top;
+}
+
+.search-results {
+  height: auto;
+  padding: 10px 10px 30px;
+}
+
+.search-result {
+  color: black;
+  text-decoration: none;
+  height: 70px;
+  display: flex;
+  border-bottom: 1px solid gainsboro;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.App.dark-mode .search-result {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.search-result-img-div {
+  height: 50px;
+  width: 50px;
+  margin-right: 10px;
+}
+
+.search-result-img-div img {
+  height: 100%;
+  width: 100%;
+  border-radius: 25px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.search-result-username {
+  color: black;
+  text-decoration: none;
+}
+
+.search-result-username .verified-badge {
+  margin-left: 0px;
+  height: 12px;
+  width: 12px;
+}
+
+.story-verified-badge {
+  height: 12px;
+  width: 12px;
+  border: 10px;
+}
+
+.App.dark-mode .search-result-username {
+  color: gainsboro;
+}
+
+.profile-main {
+  padding: 20px 10px 10px;
+  position: relative;
+  margin-top: -4rem;
+  min-height: 100vh;
+}
+
+/* @keyframes rotate {
+  from {
+    transform: rotateZ(0);
+  }
+
+  to {
+    transform: rotateZ(180deg);
+  }
+} */
+
+.settings-div {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  transition: all 500ms linear;
+  cursor: pointer;
+}
+
+.settings-div a {
+  color: black;
+  width: 100%;
+  height: 100%;
+}
+
+.App.dark-mode .settings-div a {
+  color: gainsboro;
+}
+
+.notifications-main {
+  min-height: 100vh;
+  max-height: auto;
+}
+
+.notifications-header {
+  height: 60px;
+  display: grid;
+  padding: 5px 10px;
+  grid-template-columns: 70% 30%;
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1px solid gainsboro;
+}
+
+.notifications-header h1 {
+  margin-top: 20px;
+  margin-left: 5px;
+}
+
+.App.dark-mode .notifications-header {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.notifications-header div:nth-child(2) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.notifications-header img {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.notifications {
+  height: 500vh;
+}
+
+.notification {
+  height: auto;
+  padding: 10px 5px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid gainsboro;
+  color: black;
+  text-decoration: none;
+}
+
+.notification a {
+  color: black;
+  text-decoration: none;
+}
+
+.App.dark-mode .notification {
+  border-bottom: 1px solid var(--dm-border);
+  color: gainsboro;
+}
+
+.notification .verified-badge {
+  height: 12px;
+  width: 12px;
+  margin-left: 0;
+  margin-right: 7px;
+}
+
+.noti-img-div {
+  height: 50px;
+  width: 50px;
+  margin-right: 10px;
+}
+
+.noti-img-div img {
+  height: 100%;
+  width: 100%;
+  border-radius: 25px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.noti-sentAt {
+  margin-left: 5px;
+  opacity: 0.8;
+  color: gray;
+}
+
+.profile-main {
+  margin-top: 0px;
+  width: 100%;
+}
+
+.profile-desc-sect {
+  height: 250px;
+  display: grid;
+  grid-template-rows: 180px 1fr;
+}
+
+.profile-pfp-followers {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  width: 97vw;
+}
+
+.profile-username {
+  grid-column: 1 / span 2;
+  margin-bottom: 5px;
+}
+
+.profile-username p {
+  color: gray;
+}
+
+.verified-badge {
+  height: 15px;
+  width: 15px;
+  border-radius: 10px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.profile-pfp {
+  height: 120px;
+  width: 120px;
+  padding: 2px;
+  border-radius: 60px;
+}
+
+.no-border {
+  border: none;
+}
+
+.profile-pfp img {
+  height: 100%;
+  width: 100%;
+  border-radius: 60px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.user-followers-following {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(9, 9, 9, 0.7);
+  z-index: 200;
+  display: grid;
+  grid-template-rows: 35px 1fr;
+  padding: 20px;
+  visibility: hidden;
+  transform: scale(10%);
+  transition: all 150ms ease-in-out;
+}
+
+.user-followers-following span svg {
+  color: red;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.user-followers-following-main-div {
+  background-color: #fff;
+  border: 1px solid gray;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+  height: 100%;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 5px;
+}
+
+.App.dark-mode .user-followers-following-main-div {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.user-followers-following-main-div header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 2px solid gainsboro;
+}
+
+.App.dark-mode .user-followers-following-main-div header {
+  border-bottom: 2px solid var(--dm-border);
+}
+
+.user-followers-following-main-div header input {
+  grid-column: 1 / span 2;
+  height: 35px;
+  border-radius: 5px;
+  border: 2px solid gainsboro;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.App.dark-mode .user-followers-following-main-div header input {
+  border: 2px solid var(--dm-border);
+  background-color: black;
+  color: gainsboro;
+}
+
+.App.dark-mode .user-followers-following-main-div header input::placeholder {
+  color: gainsboro;
+  opacity: 0.8;
+}
+
+.user-followers-following-main-div header button {
+  height: 35px;
+  border: none;
+  border-radius: 5px;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: 0.9rem;
+  transition: transform 500ms linear;
+}
+
+.App.dark-mode .user-followers-following-main-div header button {
+  background-color: black;
+  color: #fff;
+  border: 1px solid var(--dm-border);
+}
+
+.user-followers-following-main-div header button:active {
+  transform: scale(90%);
+}
+
+.profile-list {
+  color: black;
+  text-decoration: none;
+  display: grid;
+  grid-template-columns: 60px 1fr 50px;
+  height: auto;
+  padding: 10px 5px;
+  border-bottom: 1px solid gainsboro;
+}
+
+.App.dark-mode .profile-list {
+  color: gainsboro;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.remove-follower {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-follower button {
+  border: none;
+  background-color: inherit;
+  color: red;
+}
+
+.remove-follower button:hover {
+  opacity: 0.8;
+}
+
+.followers-following-div {
+  display: grid;
+  grid-template-rows: 70% 30%;
+  width: 77vw;
+  margin-top: -30px;
+}
+
+.followers-following {
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.followers-following-after {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: 90px;
+}
+
+.followers-following-after button {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 1rem;
+  padding: 5px 20px;
+  border-radius: 10px;
+  background-color: inherit;
+  border: 1px solid gray;
+  transition: all 500ms linear;
+  margin-left: 15px;
+  margin-right: 10px;
+}
+
+.App.dark-mode .followers-following-after button {
+  border: 1px solid var(--dm-border);
+}
+
+.followers-following-after button a {
+  color: black;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.App.dark-mode .followers-following-after button a {
+  color: gainsboro;
+}
+
+.followers-following-after button:active {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  transform: scale(110%);
+}
+
+.followers-following div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.followers p,
+.following p,
+.posts p {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.profile-about {
+  width: 80%;
+  max-width: 600px;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+
+.post-type-nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 35px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid gainsboro;
+}
+
+.App.dark-mode .post-type-nav {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.post-type-nav button {
+  background-color: inherit;
+  border: none;
+  font-size: 1rem;
+  color: black;
+}
+
+.App.dark-mode .post-type-nav button {
+  color: gainsboro;
+}
+
+.post-type-nav button.active {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.red {
+  color: red;
+}
+
+.profile-posts-sect {
+  padding-top: 10px;
+  min-height: 50vh;
+  max-width: auto;
+  padding-bottom: 3rem;
+}
+
+.profile-posts-b {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-posts-b h2 {
+  margin-top: 20px;
+}
+
+.profile-posts {
+
+  width: 100%;
+}
+
+.cv-comment-section {
+  margin-bottom: 20px;
+  padding: 10px 20px;
+}
+
+.post-view-main {
+  min-height: 100vh;
+}
+
+.crv-comment-reply {
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+@media (min-width: 800px) {
+  .comment-view-main .comment-reply {
+    width: 87%;
+    float: right;
+  }
+}
+
+.comment-view-main .comment-reply {
+  width: 89%;
+  float: right;
+}
+
+.post-view-main,
+.comment-view-main {
+  padding: 10px 5px 40px;
+  margin-bottom: 10px;
+  min-height: 150vh;
+  max-height: auto;
+}
+
+.comment-view-main {
+  margin-top: 50px;
+}
+
+.post-view-content {
+  height: auto;
+  word-spacing: 3px;
+  margin-top: 3rem;
+  margin-bottom: 10px;
+}
+
+.post-view-content .middle-sect {
+  height: auto;
+}
+
+.post-view-content .group-media-div {
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.post-view-content .group-media {
+  height: 100%;
+}
+
+.post-view-content .scroll-posts {
+  width: 100%;
+}
+
+.comment {
+  padding: 5px 0px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+.App.dark-mode .comment {
+  border: 1px solid var(--dm-border);
+}
+
+.comment .upper-sect {
+  margin-bottom: -10px;
+}
+
+.comment .middle-sect pre {
+  font-size: 14px;
+  margin-left: 20px;
+}
+
+.App.dark-mode .comment .middle-sect pre {
+  color: gainsboro;
+}
+
+.comment-section form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  margin-bottom: 20px;
+  height: 5vh;
+}
+
+.comment-section form button {
+  font-size: 1.2rem;
+  border-radius: 5px;
+  border: 1px solid gainsboro;
+  background-color: #fff;
+}
+
+.media-icon-div {
+  width: 100%;
+  border: 1px solid gainsboro;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.App.dark-mode .media-icon-div,
+.App.dark-mode .comment-section form button {
+  border: 1px solid var(--dm-border);
+}
+
+.media-icon-div input {
+  display: none;
+}
+
+.comment-input-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-input-div textarea {
+  width: 98%;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  padding: 3px 10px;
+}
+
+.App.dark-mode .comment-input-div textarea {
+  border: 1px solid var(--dm-border);
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.media-comment .scroll-posts button:last-child {
+  margin-right: 20px;
+}
+
+#media-comment-caption {
+  background-color: white;
+  color: black;
+}
+
+.App.dark-mode #media-comment-caption {
+  background-color: black;
+  color: gainsboro;
+}
+
+#media-comment-caption::placeholder {
+  color: gainsboro;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.comment-section input {
+  border-radius: 5px;
+  border: 1px solid gray;
+  padding-left: 5px;
+  padding-right: 5px;
+  width: 95%;
+  height: 100%;
+}
+
+.App.dark-mode .comment-section input {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+  color: gainsboro;
+}
+
+.App.dark-mode .comment-section button {
+  background-color: black;
+  color: white;
+  border: 1px solid var(--dm-border);
+}
+
+.media-comment {
+  border: 1px solid gainsboro;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.media-comment textarea {
+  height: 60px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid gainsboro;
+  padding: 5px;
+}
+
+.App.dark-mode .media-comment,
+.App.dark-mode .media-comment textarea {
+  border: 1px solid var(--dm-border);
+}
+
+.comment-media-processing-overlay {
+  position: absolute;
+  bottom: 10px;
+  height: 85%;
+  left: 0;
+  right: 0;
+}
+
+.comment-media-processing-video {
+  width: 8%;
+  height: 8%;
+  margin-top: 40%;
+}
+
+.media-comment img,
+.media-comment video {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.comment-reply-upper-sect {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  color: black;
+  text-decoration: none;
+  margin-bottom: 10px;
+  height: auto;
+}
+
+.comment-reply-div {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.comment-reply-img-div {
+  width: 40px;
+  height: 40px;
+}
+
+.comment-reply-img-div img {
+  height: 100%;
+  width: 100%;
+  border-radius: 20px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.reply-username-div {
+  margin-left: 10px;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 60px 1fr;
+}
+
+.App.dark-mode .reply-username-div,
+.App.dark-mode .reply-username {
+  color: gainsboro;
+}
+
+.reply-username {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.reply-username .verified-badge {
+  height: 10px;
+  width: 10px;
+  border-radius: 5px;
+}
+
+.reply-username p:last-child {
+  color: gray;
+  font-size: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.reply-body pre {
+  padding: 2px;
+  line-height: 22px;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.App.dark-mode pre {
+  color: white;
+}
+
+.App.dark-mode .in-link {
+  color: white;
+}
+
+pre b {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* .reply-body .img-post-body-div {
+  margin-top: -6rem;
+  margin-bottom: -6.5rem;
+} */
+
+.comment-reply {
+  height: auto;
+  padding: 5px;
+  font-size: 0.9rem;
+  margin: 5px 0px 20px;
+  border-radius: 5px;
+}
+
+.deleted-reply {
+  padding: 10px;
+  border: 1px solid gainsboro;
+  margin-left: 30px;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  text-align: center;
+  color: gray;
+}
+
+.App.dark-mode .deleted-comment,
+.App.dark-mode .deleted-reply {
+  border: 1px solid var(--dm-border);
+}
+
+.reply-textarea {
+  width: 100%;
+  height: 90%;
+  margin-top: -20px;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.settings-main {
+  height: 100vh;
+  position: relative;
+}
+
+.settings-main header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 20px;
+  border-bottom: 1px solid gainsboro;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.App.dark-mode .settings-main header {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.back-btn {
+  height: 100%;
+  font-size: 1.2rem;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 50px;
+  border: none;
+  background-color: #fff;
+  transition: all 150ms linear;
+}
+
+.App.dark-mode .back-btn {
+  color: gainsboro;
+  background-color: black;
+}
+
+.settings-header {
+  height: 100%;
+}
+
+.user-pfp {
+  height: 50px;
+  padding-top: 10px;
+}
+
+.user-pfp img {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.settings-options-div {
+  margin-top: -10px;
+  padding: 10px;
+  height: auto;
+}
+
+.dm-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dm-toggle button {
+  height: 20px;
+  width: 35px;
+  border: 1px solid black;
+  border-radius: 10px;
+  background-color: #fff;
+  position: relative;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+}
+
+.dm-toggle button span {
+  position: absolute;
+  width: 18px;
+  height: 100%;
+  border-radius: 20px;
+  background-color: black;
+  /* top: 0; */
+  /* box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.4); */
+}
+
+.App.dark-mode .dm-toggle button {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.App.dark-mode .dm-toggle button span {
+  background-color: gainsboro;
+}
+
+.dm {
+  right: 0;
+}
+
+.settings-options {
+  height: 70px;
+  border-bottom: 1px solid gainsboro;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+
+.App.dark-mode .settings-options {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.settings-options a {
+  text-decoration: none;
+  color: black;
+}
+
+.App.dark-mode .settings-options a {
+  color: gainsboro;
+}
+
+.edit-profile {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  height: 100vh;
+}
+
+.edit-profile-header {
+  height: 3rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.edit-profile-form {
+  padding: 0px 20px 0;
+}
+
+.edit-form {
+  margin-top: 0;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+  height: 80vh;
+}
+
+.App.dark-mode .edit-form {
+  border: 1px solid var(--dm-border);
+}
+
+.edit-profile-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  text-decoration: underline;
+}
+
+.edit-profile-form input {
+  width: 100%;
+  margin-bottom: 40px;
+  border: none;
+  border-bottom: 1px solid gainsboro;
+  padding: 5px 10px 5px;
+}
+
+.App.dark-mode .edit-profile-form input {
+  background-color: var(--dm-border);
+  color: white;
+  border-bottom: 1px solid var(--dm-border);
+  border-radius: 10px;
+}
+
+.App.dark-mode .edit-profile-form button {
+  background-color: var(--dm-border);
+  border: 1px solid var(--dm-border);
+}
+
+.edit-profile-form input:focus {
+  outline: none;
+}
+
+.edit-profile-form label {
+  font-weight: bold;
+}
+
+.edit-profile-form button {
+  margin-top: 10px;
+  padding: 5px 20px;
+  border: 1px solid gainsboro;
+  border-radius: 15px;
+  transition: all 350ms linear;
+}
+
+.edit-profile-form button:active {
+  transform: scale(110%);
+}
+
+.delete-account,
+.log-out-btn {
+  position: absolute;
+  bottom: 30px;
+  padding: 5px 20px;
+  background-color: #fff;
+  border: 1px solid gainsboro;
+  border-radius: 15px;
+  transition: all 350ms linear;
+  font-size: 16px;
+}
+
+.App.dark-mode .delete-account,
+.App.dark-mode .log-out-btn {
+  background-color: black;
+  color: red;
+  border: 1px solid var(--dm-border);
+}
+
+.App.dark-mode .log-out-btn {
+  color: gainsboro;
+}
+
+.delete-account {
+  left: 30px;
+}
+
+.log-out-btn {
+  right: 30px;
+}
+
+.log-out-btn:active,
+.delete-account:active {
+  transform: scale(110%);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.post-bookmarks-main,
+.bookmark-main {
+  min-height: 100vh;
+  max-height: auto;
+}
+
+.bookmark-header {
+  height: 50px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 15px;
+}
+
+.App.dark-mode .bookmark-header {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.bookmark-header button {
+  border: none;
+  background-color: #fff;
+  font-size: 20px;
+}
+
+.App.dark-mode .bookmark-header button {
+  background-color: black;
+}
+
+.bookmark-header h1 {
+  margin: 0 auto;
+}
+
+.page-bookmarks {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-bookmark {
+  padding: 10px;
+  width: 100%;
+  max-width: 700px;
+  height: 200px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: black;
+  border-bottom: 1px solid gainsboro;
+}
+
+.App.dark-mode .page-bookmark {
+  color: white;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.bookmark-profile-username {
+  grid-column: 1 / span 2;
+}
+
+.bookmark-profile-username p {
+  color: gray;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+.bookmark-profile-pfp {
+  height: 120px;
+  width: 120px;
+  margin-top: 10px;
+}
+
+.bookmark-profile-pfp img {
+  height: 100%;
+  width: 100%;
+  border-radius: 60px;
+  border: 1px solid gainsboro;
+  object-fit: cover;
+  object-position: top;
+}
+
+.App.dark-mode .bookmark-profile-pfp img {
+  border: 1px solid var(--dm-border);
+}
+
+.bookmark-followers-following-div {
+  width: 100%;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.bookmark-followers-following-div .followers-following-after {
+  margin-top: 20px;
+  margin-bottom: -10px;
+}
+
+.post-bookmarks-section {
+  width: 100%;
+  margin: 1rem 0px;
+}
+
+.post-bookmark {
+  border: 1px solid gainsboro;
+  width: 98%;
+  max-width: 600px;
+  height: auto;
+  padding: 5px;
+  margin-top: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.post-bookmark a {
+  text-decoration: none;
+  color: black;
+}
+
+.post-bookmark-upper {
+  display: grid;
+  grid-template-columns: 70px 1fr 40px;
+  height: 80px;
+  padding: 5px;
+}
+
+.post-bookmark-img-div {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-bookmark-img {
+  height: 60px;
+  width: 60px;
+  border-radius: 30px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.post-bookmark-upper .post-bookmark-username-displayname {
+  padding-left: 10px;
+  padding-top: 10px;
+  display: flex;
+}
+
+.post-bookmark-options {
+  /* border: 1px solid black; */
+  height: 100%;
+  width: 50%;
+  padding-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.post-bookmark-options div {
+  height: 3px;
+  width: 3px;
+  border-radius: 4px;
+  background-color: black;
+  /* border: 1px solid black; */
+}
+
+.post-bookmark-lower {
+  padding: 10px;
+}
+
+.cv-post-content-div {
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.post-bookmark-lower a {
+  color: black;
+  text-decoration: none;
+}
+
+.comment-bookmark-post {
+  height: auto;
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.comment-bookmark-comment {
+  height: auto;
+  width: 95%;
+  float: right;
+  margin-top: 15px;
+}
+
+.comment-bookmark-comment .comment .lower-sect {
+  margin-bottom: 2px;
+}
+
+.comment-bookmark-upper {
+  display: grid;
+  grid-template-columns: 50px 1fr 40px;
+  height: 80px;
+  padding: 5px;
+}
+
+.comment-bookmark-upper .post-bookmark-username-displayname {
+  padding-left: 10px;
+  padding-top: 2px;
+}
+
+.post-bookmark-username-displayname {
+  color: black;
+  text-decoration: none;
+}
+
+.App.dark-mode .post-bookmark-username-displayname {
+  color: gainsboro;
+}
+
+.comment-bookmark-img-div {
+  height: 50px;
+  width: 50px;
+}
+
+.comment-bookmark-img {
+  height: 100%;
+  width: 100%;
+  border-radius: 25px;
+}
+
+.comment-bookmark-lower {
+  padding-left: 40px;
+  height: auto;
+}
+
+.reply-bookmark {
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  padding: 5px;
+  margin-top: 20px;
+}
+
+.post-view-main .reply-bookmark-upper {
+  display: grid;
+  grid-template-columns: 30px 1fr 40px;
+  height: 80px;
+  padding: 5px;
+  font-size: 13px;
+}
+
+.reply-bookmark-img-div {
+  height: 30px;
+  width: 30px;
+}
+
+.reply-bookmark-img {
+  height: 100%;
+  width: 100%;
+  border-radius: 15px;
+}
+
+.reply-bookmark-upper .post-bookmark-username-displayname {
+  padding-left: 5px;
+}
+
+.chat-modal-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: -1000;
+  visibility: hidden;
+  transform: scale(10%);
+  transition: all 250ms ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-modal-overlay>div div {
+  background-color: #fff;
+}
+
+.full-page {
+  min-height: 300px;
+  max-height: 500px;
+  min-width: 100px;
+  max-width: 90vw;
+}
+
+.chat-modal-item-view {
+  position: relative;
+  margin-top: 8vh;
+  height: 92vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-modal-item-view img,
+.chat-modal-item-view video {
+  z-index: 100;
+}
+
+.div-one,
+.div-two {
+  position: absolute;
+  top: 70px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.div-one {
+  left: 0;
+  right: 70%;
+}
+
+.div-two {
+  left: 30%;
+  right: 0;
+}
+
+.multiple-dm-media-modal {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  max-height: 600px;
+  min-width: 100px;
+  max-width: 90vw;
+  transition: all 150ms ease-in;
+}
+
+.nextView {
+  transform: translateX(100%);
+}
+
+.currView {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  z-index: 10;
+}
+
+.prevView {
+  transform: translateX(-100%);
+}
+
+.messaging-main {
+  height: 100%;
+  margin-bottom: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.messaging-header {
+  background-color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 3rem;
+  color: black;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: center;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+}
+
+.messaging-header button {
+  padding-left: 2px;
+  background-color: inherit;
+  font-size: 1.2rem;
+  border: none;
+  height: 80%;
+  width: 80%;
+  border-radius: 50%;
+}
+
+.App.dark-mode .messaging-header,
+.App.dark-mode .messaging-header button {
+  color: gainsboro;
+  background-color: black;
+}
+
+.App.dark-mode .messaging-header {
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.messaging-header button:active {
+  background-color: gainsboro;
+}
+
+.App.dark-mode .messaging-header button:active {
+  background-color: var(--dm-border);
+}
+
+.messaging-header div {
+  width: 90%;
+  text-align: center;
+}
+
+.messaging-loading {
+  margin-top: 50px;
+  height: 92vh;
+  width: 100%;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: 30% 70%;
+  gap: 10px;
+}
+
+.messaging-loading-upper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.messaging-loading-username {
+  height: 10px;
+  width: 150px;
+  border-radius: 5px;
+  background-color: gainsboro;
+  margin-top: 10px;
+}
+
+.messaging-loading-lower {
+  padding-top: 50px;
+  height: 100%;
+}
+
+.messaging-loading-pfp {
+  height: 120px;
+  width: 120px;
+  border-radius: 60px;
+  background-color: gainsboro;
+}
+
+.message-loading {
+  margin-bottom: 25px;
+  height: 30px;
+  width: 100%;
+  display: flex;
+}
+
+.message-loading div {
+  background-color: gainsboro;
+  height: 40px;
+  width: 180px;
+  border-radius: 5px;
+}
+
+.App.dark-mode .messaging-loading-username,
+.App.dark-mode .messaging-loading-pfp,
+.App.dark-mode .message-loading div {
+  background-color: var(--dm-border);
+}
+
+.messaging-loading .align-right {
+  margin-left: calc(100% - 200px);
+}
+
+.messages-sect {
+  padding: 20px 10px 40px;
+  max-height: 100%;
+  /* margin-top: 3rem; */
+  margin-bottom: 20px;
+  color: black;
+  position: relative;
+}
+
+.App.dark-mode .messages-sect {
+  color: gainsboro;
+}
+
+.reply-overlay {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  opacity: 0.9;
+  visibility: hidden;
+}
+
+.App.dark-mode .reply-overlay {
+  background-color: black;
+}
+
+.messages-intro-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  margin-top: 3rem;
+  text-decoration: none;
+}
+
+.messages-intro-div p {
+  color: black;
+}
+
+.App.dark-mode .messages-intro-div p {
+  color: whitesmoke;
+}
+
+.messages-intro-div>a>img {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.msg-intro-displayName {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.msg-intro-username {
+  font-weight: bold;
+}
+
+.msg-intro-followers {
+  opacity: 0.7;
+}
+
+.message-reply-div {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  z-index: 50;
+  height: 0;
+  bottom: -1000px;
+  background-color: whitesmoke;
+  border: 1px solid gainsboro;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  color: black;
+  visibility: hidden;
+  padding: 5px;
+  width: 96%;
+  overflow-y: scroll;
+}
+
+.message-reply-div span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.message-reply-div .cancel-dm-media div {
+  top: 5px;
+  right: 5px;
+  height: 18px;
+}
+
+.App.dark-mode .message-reply-div {
+  background-color: black;
+  color: gainsboro;
+  border: 1px solid var(--dm-border);
+}
+
+.delete-msg-reply-msg,
+.delete-msg-reply-msg-II {
+  padding: 5px 10px 0px;
+  /* width: 150px; */
+  height: auto;
+  background-color: transparent;
+  /* display: flex; */
+  /* border: 1px solid gainsboro; */
+  border-radius: 5px;
+  /* box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); */
+  position: fixed;
+  z-index: -100;
+  font-size: 18px;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  visibility: hidden;
+  opacity: 0;
+  top: 0;
+  /* transition: all 0ms ease-in; */
+  cursor: pointer;
+  border: none;
+}
+
+.delete-msg-reply-msg {
+  right: 0;
+}
+
+.delete-msg-reply-msg-II {
+  right: 0;
+}
+
+.App.dark-mode .delete-msg-reply-msg {
+  background-color: transparent;
+  color: gainsboro;
+}
+
+.delete-msg-reply-msg button {
+  height: 25px;
+  display: inline-block;
+  font-size: 18px;
+  width: 40px;
+  margin-bottom: 5px;
+  background-color: transparent;
+  border: none;
+  font-size: 13px;
+}
+
+.reply-msg {
+  color: gray;
+}
+
+.delete-msg,
+.App.dark-mode .delete-msg {
+  color: red;
+}
+
+.chat-date-marker {
+  margin: 20px 0;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-date-marker p {
+  font-size: 0.7rem;
+  width: auto;
+  padding: 2px 15px;
+  background-color: gray;
+  color: white;
+  border-radius: 20px;
+  font-weight: 400;
+}
+
+.message-options svg {
+  color: var(--dm-border);
+  font-weight: 100;
+}
+
+.messages-sect-message {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-top: 5px;
+  padding-bottom: 15px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-sect-message pre {
+  text-align: left;
+}
+
+.message pre {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 20px;
+  word-spacing: 2px;
+  font-weight: 300;
+  text-align: left;
+  max-height: 20000px;
+}
+
+.img,
+.video {
+  min-width: 250px;
+  width: auto;
+  max-width: 340px;
+  height: 250px;
+  object-fit: contain;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.message-body {
+  padding: 3px 10px 3px 8px;
+  line-height: 25px;
+  border: none;
+  border-radius: 5px;
+  background-color: gainsboro;
+}
+
+.App.dark-mode .message-body {
+  background-color: var(--dm-border);
+}
+
+.message-options {
+  position: absolute;
+  /* margin: auto; */
+  visibility: hidden;
+  opacity: 0;
+  font-size: 12px;
+}
+
+.align-left .message-options {
+  right: -20px;
+}
+
+.align-right .message-options {
+  left: -20px;
+}
+
+.App.dark-mode .message-body {
+  border: 1px solid rgb(77, 76, 76);
+}
+
+.App.dark-mode .img-message-body {
+  border: 1px solid rgb(77, 76, 76);
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.img-message-body {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  padding: 3px;
+  line-height: 25px;
+  border-radius: 5px;
+  position: relative;
+  border: none;
+  background-color: gainsboro;
+  /* overflow: auto; */
+}
+
+.img-message-body pre {
+  margin: 5px 5px 0px;
+}
+
+.App.dark-mode .img-message-body {
+  background-color: var(--dm-border);
+}
+
+.group-media-message-container {
+  height: auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* grid-template-rows: 1fr 1fr; */
+  gap: 2px;
+  padding-top: 3px;
+  position: relative;
+}
+
+.four {
+  grid-template-rows: 1fr 1fr;
+}
+
+.group-media-message-container+pre {
+  width: 100%;
+}
+
+.group-media-message-container img,
+.group-media-message-container video {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: top;
+  margin-top: -3px;
+  cursor: pointer;
+}
+
+.group-media-container-overlay {
+  background-color: rgba(0, 0, 0, 0.9);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 49%;
+  width: 50%;
+  z-index: 10;
+  color: white;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.group-vid-img-div {
+  height: auto;
+  width: auto;
+}
+
+.multi-media pre {
+  width: 100%;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.right {
+  background-color: gainsboro;
+  color: black;
+  /* border: none; */
+}
+
+.App.dark-mode .right {
+  border: 1px solid rgb(77, 76, 76);
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.right .img,
+.right .video {
+  border: 1px solid gainsboro;
+}
+
+.App.dark-mode .right .img,
+.App.dark-mode .right .video {
+  border: 1px solid var(--dm-border);
+}
+
+.message-time {
+  font-size: 8px;
+  position: absolute;
+  bottom: 0;
+  left: 5px;
+  bottom: -12px;
+}
+
+.App.dark-mode .message-time,
+.App.dark-mode .sent-indicator {
+  color: gainsboro;
+}
+
+.align-span {
+  right: 0;
+  text-align: right;
+  bottom: -12px;
+  width: 100%;
+}
+
+.align-left {
+  align-self: flex-start;
+  min-height: 10px;
+  max-width: 80%;
+  position: relative;
+}
+
+.align-right {
+  align-self: flex-end;
+  color: black;
+  max-width: 80%;
+  text-align: right;
+  position: relative;
+}
+
+.App.dark-mode .align-right {
+  background-color: black;
+}
+
+.reply-arrow {
+  color: gray;
+  position: absolute;
+  right: -10px;
+  top: -15px;
+  transform: translateZ(45deg);
+}
+
+.align-right .reply-arrow {
+  left: 0;
+  transform: rotateY(180deg);
+}
+
+.text-post-msg {
+  height: auto;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  position: relative;
+}
+
+.text-post-msg .message-time {
+  bottom: -12px;
+}
+
+.text-post-msg .sent-indicator {
+  bottom: -10px;
+}
+
+.story-reply .tp-div,
+.App.dark-mode .story-reply .tp-div {
+  border: none;
+}
+
+.text-story {
+  border: 1px solid gainsboro;
+  padding: 5px 10px;
+  border-radius: 5px;
+  max-width: 350px;
+  min-height: 100px;
+  max-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-story-text.text-story {
+  background-color: gainsboro;
+  border: none;
+  text-align: left;
+  min-height: 10px;
+  height: auto;
+  position: relative;
+  display: block;
+}
+
+.App.dark-mode .text-story-text.text-story {
+  background-color: var(--dm-border);
+}
+
+.text-message {
+  border: none;
+  background-color: gainsboro;
+  padding: 5px 10px;
+  border-radius: 10px;
+  height: auto;
+  min-height: 20px;
+  color: black;
+  text-align: left;
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+}
+
+.App.dark-mode .text-message {
+  background-color: var(--dm-border);
+}
+
+.text-message.reply-message {
+  border-bottom: none;
+  border: 1px solid gainsboro;
+  background-color: #fff;
+}
+
+.App.dark-mode .text-message.reply-message {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.reply-media-div {
+  height: 70px;
+  display: flex;
+  padding: 1px 2px;
+  overflow-y: hidden;
+  max-width: 380px;
+}
+
+.reply-media-div img,
+.reply-media-div video {
+  height: 100%;
+  border-radius: 10px;
+  width: 40%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.pic-post-body .reply-media-div pre {
+  font-size: 12px;
+  padding: 1px 5px;
+}
+
+.App.dark-mode .text-story {
+  border: 1px solid var(--dm-border);
+}
+
+.story-video svg {
+  color: white;
+  font-size: 20px;
+  background-color: gainsboro;
+  height: 30px;
+  width: 30px;
+  border-radius: 20px;
+}
+
+.text-story-reply {
+  text-align: left;
+  border: 1px solid gainsboro;
+  padding: 5px 10px;
+  border-radius: 10px;
+  height: auto;
+  position: relative;
+  /* margin-top: 15px; */
+}
+
+.App.dark-mode .text-story-reply {
+  border: 1px solid var(--dm-border);
+}
+
+.text-post {
+  color: black;
+}
+
+.right-stat.message-stat {
+  right: 10px;
+}
+
+.left-stat.message-stat {
+  left: 10px;
+}
+
+.message-stat {
+  color: gray;
+  font-size: 12px;
+  position: absolute;
+  bottom: 16.5px;
+  z-index: 10;
+  border: none;
+}
+
+.tp-div {
+  position: relative;
+  padding: 10px 5px 0;
+  height: auto;
+  width: auto;
+  max-width: 80%;
+  border-radius: 5px;
+  text-decoration: none;
+  color: black;
+}
+
+.is-post .tp-div,
+.is-text-post .tp-div {
+  border: 1px solid gainsboro;
+}
+
+.App.dark-mode .is-post .tp-div,
+.App.dark-mode .is-text-post .tp-div {
+  border: 1px solid var(--dm-border);
+}
+
+.is-text-post .tp-div {
+  max-width: 380px;
+  padding: 10px;
+  line-height: 25px;
+  word-spacing: 5px;
+}
+
+.is-post .tp-div,
+.App.dark-mode .is-post .tp-div {
+  border: none;
+}
+
+.tp-div a {
+  text-decoration: none;
+  color: black;
+}
+
+.App.dark-mode .tp-div {
+  color: gainsboro;
+}
+
+.text-post-overlay,
+.media-post-overlay {
+  position: absolute;
+  /* background-color: rgba(0, 0, 0, 0.8); */
+  z-index: -10;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.text-post-overlay {
+  height: 30px;
+}
+
+.media-post-overlay {
+  height: 50px;
+}
+
+.text-post-body pre {
+  text-align: left;
+  min-width: 250px;
+}
+
+/* .App.dark-mode .text-post-body {
+  border-bottom: 1px solid var(--dm-border);
+} */
+
+.text-image-story,
+.text-video-story {
+  height: 170px;
+  object-fit: contain;
+  border: 1px solid gainsboro;
+  border-bottom: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.App.dark-mode .text-image-story,
+.App.dark-mode .text-video-story {
+  border: 1px solid var(--dm-border);
+}
+
+.media-story-caption {
+  /* border: 1px solid gainsboro; */
+  border-top: none;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  background-color: gainsboro;
+}
+
+/* .App.dark-mode .media-story-caption {
+  border: 1px solid var(--dm-border);
+} */
+
+.replied-message {
+  cursor: pointer;
+}
+
+.story-reply-text {
+  color: rgb(158, 157, 157);
+  font-size: 12px;
+  margin-bottom: 3px;
+  margin-left: 10px;
+  border: none;
+  width: 100%;
+}
+
+.align-right .story-reply-text {
+  margin-left: -5px;
+  text-align: right;
+}
+
+.is-story .pic-post-body {
+  border: none;
+}
+
+.App.dark-mode .story-reply-text {
+  color: rgb(104, 103, 103);
+}
+
+.story-reply-img-div {
+  border: none;
+  background-color: gainsboro;
+  margin-top: 15px;
+  border-radius: 5px;
+  padding: 5px;
+  position: relative;
+}
+
+.App.dark-mode .story-reply-img-div {
+  background-color: gainsboro;
+}
+
+.story-reply-img {
+  min-width: 200px;
+  object-fit: cover;
+}
+
+.story-reply-img-div pre {
+  max-width: 340px;
+  text-align: left;
+}
+
+.media-post-body {
+  height: auto;
+  object-fit: contain;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 10px;
+  position: relative;
+  width: auto;
+  margin-bottom: 5px;
+}
+
+.align-right .media-post-body {
+  float: right;
+}
+
+/* .align-right .media-post-body {
+  width: auto;
+} */
+
+.story-reply .pic-post-body,
+.story-reply .video-post-body {
+  /* border: none; */
+  /* border: 1px solid gainsboro; */
+  height: auto;
+  /* padding-bottom: 5px; */
+  /* padding-top: 5px; */
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+}
+
+.media-post-body img,
+.media-post-body video,
+.photo-post-body img,
+.text-image-story,
+.text-video-story,
+.group-img,
+.group-video {
+  min-width: 200px;
+  width: auto;
+  max-width: 330px;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  object-fit: cover;
+  object-position: center;
+  margin-bottom: 0;
+}
+
+.reply-media-div .media-post-body img,
+.reply-media-div .media-post-body video,
+.reply-media-div .photo-post-body img,
+.reply-media-div .text-image-story,
+.reply-media-div .text-video-story,
+.reply-media-div .group-img,
+.reply-media-div .group-video {
+  width: auto;
+  min-width: 70px;
+  max-width: 330px;
+}
+
+.group-img,
+.group-video {
+  height: 200px;
+}
+
+.media-post-body img,
+.media-post-body video {
+  border: 1px solid gainsboro;
+  border-bottom: none;
+  height: 250px;
+}
+
+.App.dark-mode .media-post-body img,
+.App.dark-mode .media-post-body video,
+.App.dark-mode .pic-post-body {
+  border: 1px solid var(--dm-border);
+}
+
+.media-length {
+  position: absolute;
+  padding: 2px 5px;
+  right: 10px;
+  top: 5px;
+  font-size: 12px;
+  color: black;
+  border: 1px solid black;
+  border-radius: 15px;
+}
+
+.pic-post-body {
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  border-bottom: none;
+}
+
+.group-replied-message .reply-media-div {
+  max-width: 330px;
+}
+
+.reply-div {
+  min-width: 200px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.align-right .reply-div {
+  min-width: 200px;
+  align-items: flex-end;
+}
+
+.vid-pre,
+.img-pre {
+  width: auto;
+}
+
+.vid-pre pre,
+.img-pre pre {
+  background-color: gainsboro;
+  padding: 5px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  margin-top: -5px;
+  text-align: left;
+}
+
+.App.dark-mode .vid-pre pre,
+.App.dark-mode .img-pre pre {
+  background-color: var(--dm-border);
+}
+
+.pic-post-body pre,
+.video-post-body pre,
+.media-post-body pre,
+.post-body pre {
+  color: black;
+  height: auto;
+  text-align: left;
+  font-size: 14px;
+  /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 5px 10px;
+}
+
+.is-post .media-post-body pre {
+  background-color: gainsboro;
+}
+
+.App.dark-mode .is-post .media-post-body pre {
+  background-color: var(--dm-border);
+}
+
+/* .align-right .pic-post-body pre,
+.align-right .video-post-body pre {
+  font-size: 14px;
+  color: gray;
+} */
+
+.story-reply .text-post-creator {
+  margin-bottom: -10px;
+}
+
+.is-post .text-post-creator {
+  border: none;
+  margin: 0px 0px 2px 15px;
+}
+
+.text-post-creator {
+  border-top: 1px solid gainsboro;
+  padding-top: 5px 1px;
+  color: gray;
+  font-size: 10px;
+  margin: 20px 0px 2px 5px;
+  /* background-color: black; */
+}
+
+.App.dark-mode .text-post-creator {
+  border-top: 1px solid var(--dm-border);
+}
+
+.text-post-creator p {
+  text-align: left;
+}
+
+.text-post-creator p span {
+  margin-right: 10px;
+}
+
+.media-reply {
+  position: relative;
+  background-color: gainsboro;
+  border-radius: 5px;
+  padding: 5px;
+  width: auto;
+  max-width: 350px;
+}
+
+.App.dark-mode .media-reply {
+  background-color: var(--dm-border);
+}
+
+.media-reply img,
+.media-reply video {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.media-reply pre {
+  text-align: left;
+  border-top: none;
+}
+
+.text-post-info,
+.media-post-info {
+  color: white;
+  position: absolute;
+  z-index: -11;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.text-post-info {
+  height: 30px;
+  font-size: 12px;
+}
+
+.media-post-info {
+  height: 50px;
+  font-size: 14px;
+}
+
+.text-post-info div,
+.media-post-info div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.text-post-info div span,
+.media-post-info div span {
+  display: block;
+}
+
+.messages-input {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 100;
+  border-top: 1px solid gainsboro;
+  background-color: white;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.4);
+  padding: 5px;
+}
+
+.App.dark-mode .messages-input {
+  border-top: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.messages-input .select-file,
+.messages-input .send-btn {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  justify-content: flex-end;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.media-input-div {
+  border: 2px solid gray;
+  bottom: 10px;
+  height: auto;
+  width: 80%;
+  max-width: 600px;
+  padding: 5px;
+  border-radius: 10px;
+  background-color: #fff;
+  margin-left: 10px;
+  margin-right: 10px;
+  position: relative;
+  position: absolute;
+}
+
+.App.dark-mode .media-input-div {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+}
+
+.App.dark-mode .media-input-div textarea {
+  background-color: var(--dm-border);
+  color: gainsboro;
+}
+
+.multiple-dm-media-div {
+  height: 135px;
+  /* max-height: 500px; */
+  width: 95%;
+  overflow-x: scroll;
+  /* overflow-y: scroll; */
+  position: relative;
+  direction: ltr;
+  display: flex;
+}
+
+.new-chat-form .textarea-div {
+  width: 430px;
+  align-items: start;
+  justify-content: start;
+  height: 200px;
+}
+
+.new-chat-form .new-post-btn-div {
+  width: 430px;
+}
+
+.new-chat-form .media-post-cap {
+  width: 430px;
+  margin-bottom: 5px;
+}
+
+.new-chat-form .multiple-dm-media-div {
+  width: 100%;
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: gainsboro;
+  border-radius: 10px;
+  position: absolute;
+  left: 0;
+  height: 5px;
+}
+
+.App.dark-mode ::-webkit-scrollbar {
+  background-color: var(--dm-border);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 10px;
+}
+
+.cancel-story-media div {
+  height: 20px;
+  width: 2px;
+  background-color: red;
+  border-radius: 10px;
+  position: absolute;
+  top: 10px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.cancel-story-media div:first-child {
+  transform: rotateZ(40deg);
+  right: 30px;
+}
+
+.cancel-story-media div:last-child {
+  right: 30px;
+  transform: rotateZ(135deg);
+}
+
+.cancel-dm-media {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 50px;
+  width: 50px;
+  cursor: pointer;
+}
+
+
+.cancel-dm-media div {
+  height: 20px;
+  width: 2px;
+  background-color: black;
+  border-radius: 10px;
+  position: absolute;
+  top: 10px;
+}
+
+.App.dark-mode .cancel-dm-media div {
+  background-color: white;
+}
+
+.cancel-dm-media div:first-child {
+  transform: rotateZ(40deg);
+  right: 15px;
+}
+
+.cancel-dm-media div:last-child {
+  right: 15px;
+  transform: rotateZ(135deg);
+}
+
+#select-media-message {
+  display: none;
+}
+
+.img-message,
+.video-message {
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.App.dark-mode .img-message,
+.App.dark-mode .video-message {
+  border: 1px solid var(--dm-border);
+}
+
+#message-media-text {
+  width: 100%;
+  height: 60px;
+  border: none;
+  margin-top: 5px;
+}
+
+.messages-input .message-input-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+}
+
+.messages-input .message-input-div .message-input {
+  padding: 5px 15px;
+  line-height: 20px;
+  width: 95%;
+  border-radius: 25px;
+  border: 1px solid gray;
+  min-height: 70%;
+  height: auto;
+}
+
+.App.dark-mode .message-input {
+  background-color: var(--dm-border);
+  border: 1px solid rgb(117, 117, 117);
+  color: gainsboro;
+}
+
+.messages-input .send-btn {
+  border: none;
+  border-radius: 50%;
+  background-color: inherit;
+  justify-content: flex-start;
+  transition: all 400ms linear;
+}
+
+.App.dark-mode .messages-input .send-btn {
+  color: white;
+}
+
+.messages-input .send-btn:active {
+  transform: scale(80%);
+}
+
+footer {
+  z-index: 100;
+  position: fixed;
+  bottom: 0;
+  background-color: white;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 3rem;
+  box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.App.dark-mode footer {
+  background-color: black;
+  border-top: 1px solid rgb(56, 55, 55);
+}
+
+.footer {
+  height: 100%;
+  width: 100%;
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  margin: 0 auto;
+}
+
+.footer a {
+  height: 100%;
+  width: 100%;
+  transition: all 300ms linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.footer a.active-link svg {
+  transform: scale(140%);
+}
+
+/* .footer a:hover {
+  background-color: gainsboro;
+}
+
+.App.dark-mode .footer a:hover {
+  background-color: rgb(56, 55, 55);
+} */
+
+.notifications-link,
+.messages-link {
+  position: relative;
+}
+
+.messages-link .noti-span {
+  left: 52%;
+  top: 13px;
+}
+
+.active-link.messages-link .noti-span {
+  left: 55%;
+  top: 10px;
+}
+
+.noti-span {
+  color: white;
+  text-decoration: none;
+  position: absolute;
+  top: 11px;
+  left: 53%;
+  background-color: red;
+  height: 10px;
+  width: 10px;
+  border-radius: 10px;
+  visibility: hidden;
+}
+
+.icon-img {
+  height: 30px;
+  width: 30px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.footer-profile-img {
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.active-link .footer-profile-img {
+  height: 40px;
+  width: 40px;
+  border-radius: 25px;
+}
+
+.story-form-div {
+  z-index: -100;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.7);
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.story-custom {
+  height: 80px;
+  width: 100%;
+  max-width: 550px;
+  background-color: #fff;
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.8);
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  padding: 1px 0px 1px 10px;
+}
+
+.App.dark-mode .story-custom {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+select {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.App.dark-mode select {
+  background-color: black;
+  color: white;
+}
+
+.story-form {
+  width: 100%;
+  max-width: 550px;
+  background-color: #fff;
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  box-shadow: 0px -5px 10px rgba(0, 0, 0, 0.8);
+  padding: 5px 20px;
+  display: grid;
+  grid-template-rows: 50px 1fr 70px;
+  margin-top: 20px;
+  height: 500px;
+}
+
+.App.dark-mode .story-form {
+  background-color: black;
+  border: 1px solid var(--dm-border);
+}
+
+.form-cancel-btn {
+  padding: 5px;
+  width: 100px;
+  color: red;
+  cursor: pointer;
+}
+
+.story-form textarea {
+  width: 100%;
+  height: 100%;
+  max-height: 370px;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.App.dark-mode .story-form textarea {
+  border: 1px solid var(--dm-border);
+}
+
+.story-form textarea::placeholder {
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: gainsboro;
+  opacity: 0.8;
+}
+
+.story-form>div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.story-form>div label {
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid gainsboro;
+  font-size: 25px;
+  border-radius: 10px;
+  transition: all 1000ms linear;
+}
+
+.App.dark-mode .story-form>div label {
+  border: 1px solid var(--dm-border);
+  color: gray;
+}
+
+.story-form>div label:active {
+  transform: scale(80%);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.story-form>div input {
+  display: none;
+}
+
+.story-form>div button {
+  height: 40px;
+  width: 40px;
+  border: 1px solid gainsboro;
+  font-size: 25px;
+  border-radius: 10px;
+  transition: all 1000ms linear;
+}
+
+.App.dark-mode .story-form>div button {
+  border: 1px solid var(--dm-border);
+  background-color: black;
+  color: gray;
+}
+
+.story-form>div button:active {
+  transform: scale(80%);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+nav {
+  display: none;
+}
+
+/* LOADING... */
+.home-main-loading {
+  overflow-y: hidden;
+  width: 100%;
+}
+
+.posts-section-loading {
+  height: 100%;
+  padding: 10px 10px 3.5rem;
+  width: 100%;
+}
+
+.post-loading {
+  width: 100%;
+  border: 1px solid gainsboro;
+  height: 150px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  padding: 10px;
+}
+
+.App.dark-mode .post-loading {
+  border: 1px solid var(--dm-border);
+}
+
+.upper-sect-loading {
+  width: 100%;
+  height: 60px;
+  display: grid;
+  grid-template-columns: 60px 1fr;
+}
+
+.img-loading-div {
+  width: 100%;
+  height: 60px;
+  border-radius: 40px;
+  background-color: gainsboro;
+}
+
+.App.dark-mode .img-loading-div,
+.App.dark-mode .username-displayname-loading-div,
+.App.dark-mode .middle-sect-loading,
+.App.dark-mode .lower-sect-loading div {
+  background-color: var(--dm-border);
+}
+
+.username-displayname-loading-div {
+  width: 95%;
+  height: 60px;
+  margin-left: 15px;
+  background-color: gainsboro;
+  border-radius: 10px;
+}
+
+.middle-sect-loading {
+  width: 100%;
+  height: 20px;
+  background-color: gainsboro;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+.lower-sect-loading {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.lower-sect-loading div {
+  height: 15px;
+  width: 50px;
+  background-color: gainsboro;
+  border-radius: 5px;
+}
+
+.story-loading {
+  height: 90px;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.story-img-loading {
+  background-color: gainsboro;
+  width: 65px;
+  height: 65px;
+  border-radius: 35px;
+}
+
+.story-text-loading {
+  background-color: gainsboro;
+  height: 10px;
+  width: 40px;
+  margin-top: 5px;
+  border-radius: 2px;
+}
+
+.pfp-div div {
+  height: 85%;
+  width: 85%;
+  background-color: gainsboro;
+  border-radius: 50px;
+  opacity: 0.4;
+}
+
+.App.dark-mode .story-img-loading,
+.App.dark-mode .story-text-loading,
+.App.dark-mode .pfp-div div {
+  background-color: var(--dm-border);
+}
+
+.post-view-main-loading {
+  height: auto;
+  width: 97vw;
+  overflow-y: hidden;
+}
+
+.pv-post-loading {
+  width: 100%;
+  height: 150px;
+  padding: 5px;
+  display: grid;
+  grid-template-rows: 1fr 1fr 0.5fr;
+  margin-bottom: 70px;
+}
+
+.pvp-upper-sect {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  padding: 5px;
+}
+
+.pvp-img-loading {
+  height: 60px;
+  width: 60px;
+  background-color: gainsboro;
+  border-radius: 30px;
+}
+
+.pvp-username-name-loading {
+  height: 60px;
+  width: 100%;
+  border-radius: 10px;
+  background-color: gainsboro;
+}
+
+.pvp-middle-sect {
+  width: 100%;
+  padding: 5px;
+}
+
+.pvp-middle-sect div:first-child {
+  width: 100%;
+  background-color: gainsboro;
+  border-radius: 5px;
+  height: 12px;
+  margin-top: 5px;
+}
+
+.pvp-middle-sect div:last-child {
+  width: 70%;
+  background-color: gainsboro;
+  border-radius: 5px;
+  height: 12px;
+  margin-top: 7px;
+}
+
+.pvp-lower-sect {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  margin-top: 7px;
+}
+
+.pvp-lower-sect div {
+  background-color: gainsboro;
+  border-radius: 5px;
+  width: 50px;
+  height: 12px;
+}
+
+.App.dark-mode .pvp-img-loading,
+.App.dark-mode .pvp-username-name-loading,
+.App.dark-mode .pvp-middle-sect div:first-child,
+.App.dark-mode .pvp-middle-sect div:last-child,
+.App.dark-mode .pvp-lower-sect div {
+  background-color: var(--dm-border);
+}
+
+.messages-loading {
+  height: 84vh;
+  width: 99%;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+@media (min-width: 500px) {
+  .messages-loading {
+    margin-top: 50px;
+  }
+}
+
+.chat-loading {
+  height: 70px;
+  border-bottom: 1px solid gainsboro;
+  width: 100%;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 60px 1fr 30px;
+}
+
+.App.dark-mode .chat-loading {
+  border: 1px solid var(--dm-border);
+}
+
+.chat-pfp-loading {
+  height: 50px;
+  width: 50px;
+  border-radius: 25px;
+  background-color: gainsboro;
+}
+
+.chat-name-text-loading {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+.chat-name-loading {
+  width: 100px;
+  height: 12px;
+  border-radius: 3px;
+  background-color: gainsboro;
+}
+
+
+.chat-text-loading {
+  width: 100%;
+  height: 12px;
+  border-radius: 3px;
+  background-color: gainsboro;
+}
+
+
+.chat-time-loading {
+  height: 10px;
+  width: 100%;
+  background-color: gainsboro;
+  border-radius: 2px;
+}
+
+.App.dark-mode .chat-pfp-loading,
+.App.dark-mode .chat-text-loading,
+.App.dark-mode .chat-name-loading,
+.App.dark-mode .chat-time-loading {
+  background-color: var(--dm-border);
+}
+
+.profile-main-loading {
+  margin: auto auto;
+  height: 92vh;
+  width: 99vw;
+  display: grid;
+  grid-template-rows: 35% 65%;
+}
+
+.profile-upper-loading {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 70% 20%;
+  padding: 5px;
+}
+
+.profile-upper-upper-loading {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 25% 75%;
+  padding: 10px;
+}
+
+.profile-img-loading {
+  width: 110px;
+  height: 110px;
+  background-color: gainsboro;
+  border-radius: 70px;
+}
+
+.profile-followers-following-loading {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-left: 30px;
+}
+
+.profile-followers-following-loading>div {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-followers-following-loading>div div:first-child {
+  background-color: gainsboro;
+  height: 70px;
+  width: 40px;
+  border-radius: 5px;
+}
+
+.profile-followers-following-loading>div div:nth-child(2) {
+  width: 80%;
+  height: 12px;
+  margin-top: 15px;
+  background-color: gainsboro;
+  border-radius: 5px;
+}
+
+.profile-upper-lower-loading {
+  /* border: 1px solid brown; */
+  padding: 5px;
+}
+
+.profile-upper-lower-loading div:first-child {
+  background-color: gainsboro;
+  border-radius: 5px;
+  width: 100%;
+  height: 10px;
+}
+
+.profile-upper-lower-loading div:last-child {
+  background-color: gainsboro;
+  border-radius: 5px;
+  width: 40%;
+  height: 10px;
+  margin-top: 7px;
+}
+
+.profile-lower-loading {
+  height: 100%;
+  width: 100%;
+  padding: 5px 10px 10px;
+}
+
+.profile-lower-upper-sect {
+  width: 100%;
+  height: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.profile-lower-upper-sect div {
+  width: 70px;
+  height: 100%;
+  border-radius: 5px;
+  background-color: gainsboro;
+}
+
+.App.dark-mode .profile-img-loading,
+.App.dark-mode .profile-followers-following-loading>div div:first-child,
+.App.dark-mode .profile-followers-following-loading>div div:nth-child(2),
+.App.dark-mode .profile-upper-lower-loading div:first-child,
+.App.dark-mode .profile-upper-lower-loading div:last-child,
+.App.dark-mode .profile-lower-upper-sect div {
+  background-color: var(--dm-border);
+}
+
+.deleted-comment {
+  width: 100%;
+  border: 1px solid gainsboro;
+  color: gray;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+
+
+@media (max-width: 400px) {
+  .settings-div {
+    font-size: 1.3rem;
+  }
+
+  .profile-desc-sect {
+    margin-bottom: 30px;
+  }
+
+  .messages-input .select-file {
+    justify-content: center;
+  }
+
+  .bookmark-followers-following-div p {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 400px) {
+  .share-menu-search {
+    width: 87%;
+  }
+}
+
+@media (min-width: 450px) {
+  .story-details {
+    width: 350px;
+  }
+}
+
+@media (max-width: 500px) {
+  .messages-main {
+    padding-top: 10px;
+    width: 100vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+    min-height: 100vh;
+    max-height: auto;
+  }
+
+  .App.dark-mode .messages-main {
+    border-left: 1px solid var(--dm-border);
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .chat {
+    color: black;
+    text-decoration: none;
+    height: 70px;
+    width: 100%;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 75px 1fr 50px;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .new-chat-form {
+    left: 10px;
+    right: 10px;
+  }
+
+  .new-chat-form .textarea-div {
+    width: 365px;
+    align-items: start;
+    justify-content: start;
+    height: auto;
+  }
+
+  .new-chat-form .new-post-btn-div {
+    width: 365px;
+  }
+
+  .new-chat-form .media-post-cap {
+    width: 365px;
+    margin-bottom: 5px;
+  }
+
+  .new-chat-form .multiple-dm-media-div {
+    width: 100%;
+    height: 100%;
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .messages-input {
+    left: 0;
+  }
+
+  .start-chat {
+    display: none;
+  }
+
+  .none {
+    display: none;
+  }
+
+  .page-bookmark {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+  }
+
+  .page-bookmark .followers-following {
+    width: 100%;
+  }
+
+  .bookmark-profile-pfp {
+    height: 100px;
+    width: 100px;
+    margin-top: 10px;
+  }
+
+  .bookmark-followers-following-div {
+    padding: 10px;
+  }
+
+}
+
+@media (max-width: 550px) {
+  .new-dm-users-list {
+    position: fixed;
+    bottom: 0;
+    top: 4rem;
+    /* right: 100px; */
+    width: 95%;
+    left: 10px;
+  }
+
+  .new-dm-users-list-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+
+  .input-cancel-btn {
+    position: fixed;
+    display: grid;
+    grid-template-columns: 60px 1fr 70px;
+    height: 35px;
+    top: 10px;
+    left: 10px;
+    width: 95%;
+  }
+
+  .input-cancel-btn input {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}
+
+@media (min-width: 501px) {
+  .share-menu-search {
+    width: 91%;
+  }
+
+  .messaging.messages-main {
+    position: fixed;
+    overflow-y: scroll;
+    margin-top: 0;
+  }
+
+  .messages-main {
+    width: 13vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+    min-height: 100vh;
+    max-height: auto;
+  }
+
+  .chat-list,
+  .messages-loading-div {
+    top: 3rem;
+    left: 0;
+    position: fixed;
+    width: 13vw;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+
+  .App.dark-mode .messages-main {
+    border-left: 1px solid var(--dm-border);
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .messaging-main {
+    width: 87vw;
+    position: relative;
+  }
+
+  .messages-input {
+    left: 13vw;
+  }
+
+  .messaging-header {
+    position: fixed;
+    top: 0;
+    height: 3rem;
+    left: 13vw;
+    right: 0;
+    z-index: 100;
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 13vw 1fr;
+  }
+
+  .start-chat {
+    position: absolute;
+    width: 87vw;
+    left: 13vw;
+    top: 10rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .footer a {
+    border-right: 1px solid gainsboro;
+  }
+
+  .App.dark-mode .footer a {
+    border-right: 1px solid rgb(56, 55, 55);
+  }
+
+  .footer a:last-child {
+    border: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .followers-following-after {
+    justify-content: flex-start;
+    margin-left: 20px;
+  }
+
+  .media-post-body img,
+  .media-post-body video,
+  .text-image-story,
+  .text-video-story,
+  .group-img,
+  .group-video {
+    min-width: 200px;
+    max-width: 100%;
+  }
+
+  .reply-media-div .media-post-body img,
+  .reply-media-div .media-post-body video,
+  .reply-media-div .photo-post-body img,
+  .reply-media-div .text-image-story,
+  .reply-media-div .text-video-story,
+  .reply-media-div .group-img,
+  .reply-media-div .group-video {
+    min-width: 70px;
+    width: auto;
+    max-width: 355px;
+  }
+
+  .media-post-body img,
+  .media-post-body video {
+    max-width: 100%;
+  }
+
+  .img,
+  .video {
+    min-width: 220px;
+    max-width: 100%;
+  }
+
+  .story-reply-img-div pre {
+    width: 100%;
+  }
+
+  .group-media-message-container img,
+  .group-media-message-container video {
+    width: 100%;
+    /* height: 100%; */
+  }
+
+  .multi-media pre {
+    width: 100%;
+  }
+
+  .group-media-container-overlay {
+    bottom: 3px;
+  }
+
+}
+
+@media (min-width: 620px) {
+  .messages-main {
+    width: 12vw;
+  }
+
+  .chat-list,
+  .messages-loading-div {
+    width: 12vw;
+    height: 100vh;
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 12vw 1fr;
+  }
+
+  .start-chat {
+    left: 12vw;
+    width: 88vw;
+  }
+
+  .messaging-main {
+    width: 88vw;
+  }
+
+  .messages-input,
+  .messaging-header {
+    left: 12vw;
+  }
+}
+
+@media (min-width: 700px) {
+  .img-post-body {
+    border-radius: 10px;
+  }
+
+  .post,
+  .comment-bookmark-post,
+  .page-bookmark {
+    width: 90%;
+    margin: 30px auto 10px;
+  }
+
+  .post-view-main,
+  .comment-view-main {
+    width: 90vw;
+    margin-left: 3vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+  }
+
+  .App.dark-mode .post-view-main,
+  .App.dark-mode .comment-view-main {
+    border-left: 1px solid var(--dm-border);
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 10vw 1fr;
+  }
+
+  .messages-main {
+    width: 10vw;
+  }
+
+  .chat-list,
+  .messages-loading-div {
+    width: 10vw;
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 10vw 1fr;
+  }
+
+  .start-chat {
+    left: 10vw;
+    width: 90vw;
+  }
+
+  .messaging-main {
+    width: 90vw;
+  }
+
+  .messages-input,
+  .messaging-header {
+    left: 10vw;
+  }
+
+  .messaging.messages-main .messages-main-start-chat {
+    margin-top: 0rem;
+  }
+}
+
+@media (min-width: 800px) {
+  .img-post-body {
+    border-radius: 10px;
+  }
+
+  .post,
+  .comment-bookmark-post,
+  .page-bookmark {
+    width: 90%;
+    margin: 30px auto 10px;
+  }
+
+  .post-div {
+    width: 100%;
+  }
+
+  .post-view-main,
+  .comment-view-main,
+  .post-bookmarks-main,
+  .bookmark-main {
+    width: 85vw;
+    margin-left: 13vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+  }
+
+  .comment-view-main {
+    min-height: 150vh;
+  }
+
+  .App.dark-mode .post-view-main,
+  .App.dark-mode .comment-view-main,
+  .App.dark-mode .post-bookmarks-main,
+  .App.dark-mode .bookmark-main {
+    border-left: 1px solid var(--dm-border);
+    border-right: 1px solid var(--dm-border);
+  }
+}
+
+@media (min-width:800px) {
+  .home-main {
+    width: 80vw;
+    margin-left: 15vw;
+    margin-top: 0px;
+    min-height: 100vh;
+    max-height: auto;
+  }
+
+  .sign-up-main {
+    left: 15vw;
+    width: 82vw;
+  }
+
+  /* .post {
+    width: 75%;
+    margin-left: 5vw;
+  } */
+
+  .home-header {
+    box-shadow: none;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-right: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .messages-header {
+    width: 12.05vw;
+  }
+
+  .main-header {
+    width: 12vw;
+  }
+
+  .App.dark-mode .home-header {
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .home-header svg {
+    font-size: 25px;
+  }
+
+  .img-post-body,
+  .vid-post-body,
+  .pv-vid-post-body {
+    max-height: 500px;
+  }
+
+  .stories {
+    height: 100px;
+  }
+
+  .empty-story div {
+    height: 70px;
+    width: 70px;
+    border-radius: 40px;
+  }
+
+  .story {
+    height: 90px;
+    width: 90px;
+    margin-right: 20px;
+    padding: 1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: none;
+  }
+
+  .story-indicator {
+    height: 70px;
+    width: 70px;
+  }
+
+  .story-overlay {
+    height: 100%;
+    width: 100%;
+    border-radius: 40px;
+  }
+
+  .story-indicator img {
+    height: 100%;
+    width: 100%;
+    border-radius: 45px;
+  }
+
+  .empty-story {
+    height: 80px;
+    width: 80px;
+    border-radius: 50px;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .empty-story p {
+    margin-top: 80px;
+    font-size: 12px;
+  }
+
+
+  .posts-section {
+    margin-top: 0.2rem;
+  }
+
+  .main-nav {
+    /* background-color: rgb(141, 116, 85); */
+    width: 12vw;
+  }
+
+  nav {
+    /* background-color: rgb(141, 116, 85); */
+    background-color: #fff;
+    color: black;
+    position: fixed;
+    z-index: 100;
+    top: 5rem;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid gainsboro;
+    display: block;
+  }
+
+  .App.dark-mode nav {
+    background-color: black;
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .messages-nav.nav {
+    width: 12vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav {
+    height: 90%;
+    width: 12vw;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav button {
+    cursor: pointer;
+  }
+
+  .nav>a,
+  .nav>div {
+    height: 5rem;
+    width: 100%;
+    transition: all 300ms linear;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .nav>a {
+    color: black;
+  }
+
+  .App.dark-mode .nav>a {
+    color: gainsboro;
+  }
+
+  .profile-icon-div {
+    /* border: 1px solid red; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav>div {
+    margin-top: 30px;
+  }
+
+  .App.dark-mode .nav>div {
+    color: gainsboro;
+  }
+
+  .nav>a.active-link {
+    font-size: 24px;
+  }
+
+  .nav>a:hover {
+    background-color: gainsboro;
+  }
+
+  .App.dark-mode .nav>a:hover {
+    background-color: var(--dm-border);
+  }
+
+  .notifications-link span {
+    top: 2px;
+    left: 55%;
+    font-size: 12px;
+    height: 9px;
+    width: 9px;
+    border-radius: 5px;
+  }
+
+  .messages-link .noti-span {
+    top: 30%;
+    left: 57%;
+  }
+
+  .active-link.messages-link .noti-span {
+    top: 31%;
+    left: 57%;
+  }
+
+  .notifications-icon-div {
+    position: relative;
+  }
+
+  .nav a img {
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .active-link .footer-profile-img {
+    height: 50px;
+    width: 50px;
+    border-radius: 25px;
+  }
+
+  .more-icon-div {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .more-div {
+    position: absolute;
+    left: 5rem;
+    height: auto;
+    width: 220px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    bottom: 1.5rem;
+  }
+
+  .App.dark-mode .more-div {
+    background-color: black;
+    border: 1px solid var(--dm-border);
+    color: gainsboro;
+  }
+
+  .more-div a {
+    border-bottom: 1px solid gainsboro;
+    padding-left: 5px;
+  }
+
+  .App.dark-mode .more-div a {
+    border-bottom: 1px solid var(--dm-border);
+  }
+
+  .more-div a,
+  #log-out-btn {
+    height: auto;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: black;
+    text-decoration: none;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .App.dark-mode .more-div a,
+  .App.dark-mode #log-out-btn {
+    color: gainsboro;
+    background-color: black;
+  }
+
+  .more-div a:hover,
+  #log-out-btn:hover {
+    background-color: gainsboro;
+  }
+
+  .App.dark-mode .more-div a:hover,
+  .App.dark-mode #log-out-btn:hover {
+    background-color: var(--dm-border);
+  }
+
+  .more-div a svg {
+    margin-right: 10px;
+  }
+
+  #log-out-btn {
+    padding-left: 7px;
+    background-color: white;
+    color: black;
+    border: none;
+  }
+
+  .post-view-content {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .search-main,
+  .notifications-main,
+  .profile-main,
+  .bookmarked-pages-main,
+  .post-view-main,
+  .settings-main,
+  .post-bookmarks-main,
+  .bookmark-main {
+    width: 80vw;
+    margin-left: 15vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .comment-view-main {
+    min-height: 150vh;
+    width: 80vw;
+    margin-left: 15vw;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+    height: auto;
+    margin-top: 0;
+  }
+
+  .messages-main {
+    /* padding-top: 1rem; */
+    margin-left: 12vw;
+    margin-top: 0;
+    /* width: 35vw; */
+  }
+
+  .chat-list {
+    left: 12vw;
+    /* width: 35vw; */
+  }
+
+  .messages-loading {
+    margin-top: 0;
+  }
+
+  .messages-loading-div {
+    top: 0;
+    padding-top: 10px;
+    left: 12vw;
+  }
+
+  .messages-main-start-chat>h1 {
+    padding-left: 10px;
+    border-right: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+    width: 35vw;
+    left: 12vw;
+  }
+
+  /* .messaging.messages-main .messages-main-start-chat>h1 {
+    margin-left: 0;
+    margin-top: 0;
+  } */
+
+  .App.dark-mode .messages-main-start-chat>h1 {
+    border-right: 1px solid var(--dm-border);
+    border-bottom: 1px solid var(--dm-border);
+  }
+
+  .content-div {
+    /* display: grid;
+    grid-template-columns: 47vw 1fr; */
+  }
+
+  .start-chat {
+    width: 78vw;
+    left: 22vw;
+  }
+
+  .messaging-main {
+    width: 78vw;
+    left: 12vw;
+  }
+
+  .messages-input,
+  .messaging-header {
+    left: 22vw;
+  }
+
+  .App.dark-mode .profile-main,
+  .App.dark-mode .search-main,
+  .App.dark-mode .notifications-main,
+  .App.dark-mode .bookmarked-pages-main,
+  .App.dark-mode .messages-main,
+  .App.dark-mode .post-view-main,
+  .App.dark-mode .comment-view-main,
+  .App.dark-mode .settings-main,
+  .App.dark-mode .post-bookmarks-main,
+  .App.dark-mode .bookmark-main {
+    border-left: 1px solid var(--dm-border);
+    border-right: 1px solid var(--dm-border);
+  }
+
+  .footer-profile-pic-div {
+    height: auto;
+    padding: 5px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .footer-profile-pic-div img {
+    height: 50px;
+    width: 50px;
+    border-radius: 25px;
+    margin-right: 15px;
+  }
+
+  .followers-following-div {
+    display: grid;
+    grid-template-rows: 70% 30%;
+    width: 55vw;
+  }
+
+  .followers-following {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    cursor: pointer;
+  }
+
+  footer {
+    display: none;
+  }
+}
+
+@media(min-width: 850px) {
+  .messages-header {
+    width: 10.1vw;
+  }
+
+  .messages-nav.nav {
+    width: 10vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .messages-main {
+    width: 37vw;
+    margin-left: 10vw;
+  }
+
+  .chat-list {
+    width: 37vw;
+    left: 10vw;
+  }
+
+  .chat {
+    color: black;
+    text-decoration: none;
+    height: 70px;
+    width: 100%;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 75px 1fr 50px;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .messages-loading-div {
+    top: 80px;
+    left: 10vw;
+    width: 37vw;
+  }
+
+  .messages-main-start-chat>h1 {
+    position: fixed;
+    padding-left: 10px;
+    border-right: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+    width: 37vw;
+    left: 10vw;
+    padding-bottom: 0.5rem;
+  }
+
+  .App.dark-mode .messages-main-start-chat>h1 {
+    border-right: 1px solid var(--dm-border);
+    border-bottom: 1px solid var(--dm-border);
+  }
+
+  .content-div {
+    display: grid;
+    /* grid-template-columns: 40vw 1fr; */
+  }
+
+  .start-chat {
+    width: 53vw;
+    left: 47vw;
+  }
+
+  .messaging-main {
+    width: 53vw;
+    left: 37vw;
+  }
+
+  .messages-input,
+  .messaging-header {
+    left: 47vw;
+  }
+}
+
+@media (min-width:1000px) {
+  .app-title-div {
+    padding-left: 20%;
+  }
+
+  .home-main {
+    width: 77vw;
+    margin-left: 22vw;
+  }
+
+  .sign-up-main {
+    left: 25vw;
+    width: 73vw;
+  }
+
+  .post,
+  .comment-bookmark-post,
+  .page-bookmark {
+    width: 85%;
+    margin-left: 3vw;
+  }
+
+  .main-header {
+    width: 22vw;
+  }
+
+  .img-post-body,
+  .vid-post-body,
+  .pv-vid-post-body {
+    max-height: 550px;
+  }
+
+  .story {
+    margin-right: 30px;
+  }
+
+  .main-nav {
+    width: 22vw;
+  }
+
+  .nav {
+    height: 90%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .main-nav .nav>a,
+  .main-nav .nav>div {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    align-items: center;
+    justify-items: start;
+    padding-left: 20px;
+  }
+
+  .nav>a.active-link {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .messages-link .noti-span {
+    top: 34%;
+    left: 15.5%;
+  }
+
+  .active-link .footer-profile-img {
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+  }
+
+  .nav>div {
+    font-size: 20px;
+  }
+
+  .img-post-body {
+    border-radius: 5px;
+    min-height: 100px;
+    height: 100%;
+  }
+
+  .pfp-div {
+    height: 3rem;
+    width: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .post-view-main,
+  .comment-view-main,
+  .search-main,
+  .notifications-main,
+  .profile-main,
+  .settings-main,
+  .bookmarked-pages-main,
+  .post-bookmarks-main,
+  .bookmark-main {
+    width: 70vw;
+    margin-left: 26vw;
+  }
+
+  .multiple-dm-media-modal {
+    max-width: 900px;
+  }
+}
+
+@media(min-width: 1100px) {
+  .messages-header {
+    width: 9.1vw;
+  }
+
+  .messages-nav.nav {
+    width: 9vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .messages-main {
+    width: 36vw;
+    margin-left: 9vw;
+  }
+
+  .chat-list {
+    width: 36vw;
+    left: 9vw;
+  }
+
+  .chat {
+    color: black;
+    text-decoration: none;
+    height: 70px;
+    width: 100%;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 65px 1fr 50px;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .messages-loading-div {
+    top: 80px;
+    width: 36vw;
+    left: 9vw;
+  }
+
+  .messages-main-start-chat>h1 {
+    position: fixed;
+    padding-left: 10px;
+    border-right: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+    width: 36vw;
+    left: 9vw;
+    padding-bottom: 0.5rem;
+  }
+
+  .App.dark-mode .messages-main-start-chat>h1 {
+    border-right: 1px solid var(--dm-border);
+    border-bottom: 1px solid var(--dm-border);
+  }
+
+  .content-div {
+    display: grid;
+    grid-template-columns: 45vw 55vw;
+  }
+
+  .start-chat {
+    width: 55vw;
+    left: 45vw;
+  }
+
+  .messaging-main {
+    width: 55vw;
+    left: 0;
+  }
+
+  .messages-input,
+  .messaging-header {
+    left: 45vw;
+  }
+
+  .messages-link .noti-span {
+    top: 34%;
+    left: 14.5%;
+  }
+}
+
+@media (min-width:1200px) {
+  .home-main {
+    width: 78vw;
+    margin-left: 20vw;
+  }
+
+  .sign-up-main {
+    left: 22vw;
+    width: 76vw;
+  }
+
+  .post,
+  .comment-bookmark-post {
+    width: 75%;
+    margin-left: 5vw;
+  }
+
+  .main-header {
+    width: 20vw;
+  }
+
+  .story {
+    margin-right: 30px;
+  }
+
+  .main-nav {
+    width: 20vw;
+  }
+
+  .messages-link .noti-span {
+    top: 34%;
+    left: 14.5%;
+  }
+
+  .post-view-main,
+  .comment-view-main,
+  .search-main,
+  .notifications-main,
+  .profile-main,
+  .settings-main,
+  .bookmarked-pages-main {
+    width: 65vw;
+    margin-left: 25vw;
+  }
+}
+
+@media(min-width: 1300px) {
+  .messages-link .noti-span {
+    top: 34%;
+    left: 13.5%;
+  }
+}
+
+@media(min-width: 1400px) {
+  .messages-link .noti-span {
+    top: 34%;
+    left: 12.5%;
+  }
+}
+
+/* @media(min-width: 1500px) {
+
+  .main-nav,
+  .messages-nav {
+    width: 150px;
+  }
+
+  .home-main,
+  .post-view-main,
+  .comment-view-main,
+  .search-main,
+  .notifications-main,
+  .profile-main,
+  .settings-main,
+  .bookmarked-pages-main,
+  .post-bookmarks-main,
+  .bookmark-main {
+    width: 800px;
+    margin-left: 30vw;
+  }
+} */
+
+
+
+.show-div {
+  visibility: visible;
+  transform: scale(100%);
+  z-index: 1000;
+}
+
+.show-noti {
+  z-index: -1000;
+  display: none;
+  top: 1000vh;
+  left: 1000vh;
+  opacity: 0;
+}
+
+.show {
+  transform: translateY(0);
+  z-index: 1000;
+  visibility: visible;
+}
+
+.show-del-div {
+  z-index: 100;
+  visibility: visible;
+  opacity: 1;
+}
+
+.show-comment-replies {
+  font-size: 20px;
+}
+
+.show-error {
+  visibility: visible;
+  z-index: 10000;
+  transform: translateY(0);
+}
