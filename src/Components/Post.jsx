@@ -1,556 +1,291 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { FaRegHeart, FaRegComment, FaShareSquare, FaAngleLeft, FaAngleRight } from 'react-icons/fa'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { FaRegComment } from 'react-icons/fa'
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { Link, useNavigate } from 'react-router-dom'
 import { appContext } from '../App'
-import Options from './Options'
-import OtherOption from './OtherOption'
-import verifiedBadge from '../Images/verified-badge.jpg'
+import LoadPosts from "./LoadPosts"
+import Options from './GENERAL-COMPONENTS/Options'
+import GroupMedia from './GENERAL-COMPONENTS/GroupMedia'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import IosShareIcon from '@mui/icons-material/IosShare';
+import VerifiedBadge from './GENERAL-COMPONENTS/VerifiedBadge';
+import PostCaption from './GENERAL-COMPONENTS/PostCaption';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { postsRef } from '../firebase/config';
+import UserPfp from './GENERAL-COMPONENTS/UserPfp';
+import { functionsContext } from '../CONTEXTS/FunctionsContext';
+import Video from './GENERAL-COMPONENTS/Video';
 
-const Post = ({ post, func, postId }) => {
-  const {
-    handleLike, allPosts, users, userAuth, showOptionsDIv, setShowOptionsDiv, setShowShareMenu, setSelectedMessage, showOtherOptionsDIv, setShowOtherOptionsDiv
-  } = useContext(appContext)
-  const { userId } = useParams()
-  const { id, body, time, date, likes, comments, creator, caption, type, shares } = post
 
-  const [user, setUser] = useState(users.find(p => p.id === creator))
-  const [index, setIndex] = useState(0)
-  const [cond, setCond] = useState(false)
-  const [trigger, setTrigger] = useState(false)
-  const groupRef = useRef()
-  const btnRef = useRef()
-  const navigate = useNavigate()
 
-  var topDomains = /(\.com | \.de | \.org | \.net | \.us | \.co | \.edu | \.gov | \.biz | \.za | \.info | \.cc | \.ca | \.cn | \.fr | \.ch | \.au | \.in | \.jp | \.be | \.it | \.nl | \.uk | \.mx | \.no | \.ru | \.br | \.se | \.es | \.at | \.dk | \.eu | \.il)$/gim;
-  
+const Post = ({ post, isProcessing, opacity, postLink }) => {
+  const { allPosts, users, user,  } = useContext(appContext)
+  const { id, creator } = post
 
-  function isLinkElement(textContent) {
-    // Check if the element has a link-like appearance (e.g., starts with 'http', 'https', 'www', or 'ftp')
-    const text = textContent;
-    
-    const linkLikeRegexB = /^(https?|www\.|ftp)/gi;
-    const linkLikeRegexE = /(\.com|\.de|\.org|\.net|\.us|\.co|\.edu|\.gov|\.biz|\.za|\.info|\.cc|\.ca|\.cn|\.fr|\.ch|\.au|\.in|\.jp|\.be|\.it|\.nl|\.uk|\.mx|\.no|\.ru|\.br|\.se|\.es|\.at|\.dk|\.eu|\.il)$/gi;
+  const [loading, setLoading] = useState(true)
+  const [comments, setComments] = useState(null)
+  const [postCreator, setPostCreator] = useState(null)
+  const [postByDeletedAccount, setPostByDeletedAccount] = useState(false)
 
-    if (linkLikeRegexB.test(text) || linkLikeRegexE.test(text)) {
-      return true
-    } else {
-      return false 
+
+  useEffect(() => {
+    if (users) {
+      const userObj = users.find(p => p.id === creator)
+
+      if (!userObj) {
+        setPostByDeletedAccount(true)
+        setLoading(false)
+
+      } else {
+        setPostCreator(userObj)
+      }
     }
-  }
+  }, [creator, users])
 
 
-  // useEffect(() => {
-  //   const callOn = () => {
-  //     if (btnRef.current) {
-  //       btnRef.current.style.visibility = 'visible'
-  //     }
-  //   }
+  useEffect(() => {
+    if (post) {
+      const commentRef = collection(postsRef, id, 'comments')
 
-  //   const callOff = () => {
-  //     if (btnRef.current) {
-  //       btnRef.current.style.visibility = 'hidden'
-  //     }
-  //   }
+      onSnapshot(commentRef, snap => {
+        const commentsArr = []
+        snap.docs.forEach(doc => {
+          commentsArr.push({ ...doc.data(), id: doc.id })
+        })
 
-  //   groupRef.current?.addEventListener('mouseover', function () {
-  //     callOn()
-  //     setTrigger(!trigger)
-  //   })
-
-  //   groupRef.current?.addEventListener('mouseleave', function () {
-  //     setTimeout(() => {
-  //       callOff()
-  //       setTrigger(!trigger)
-  //     }, 2000);
-  //   })
-  //   // return () => groupRef.current
-  // }, [trigger])
-
-
-  const linkTo = (e, link) => {
-    if (e.target.nodeName !== 'path' && e.target.nodeName !== 'svg' && e.target.nodeName !== 'BUTTON') {
-      e.preventDefault()
-      navigate(`/post/${link}`)
+        setComments([...commentsArr])
+      })
     }
-  }
+  }, [post])
 
-  // console.log(creator)
 
-  if (!user) {
+  useEffect(() => {
+    if (post && postCreator && comments) {
+      setLoading(false)
+    } 
+  }, [post, postCreator, comments])
+
+
+
+
+  if (postByDeletedAccount) {
     return (
       <div className="deleted-comment">
         This post was made by a deleted account
       </div>
     )
+
+  } else if (loading) {
+    return (
+      <LoadPosts />
+    )
+
   } else {
     return (
-      <div id={id} className="post" onClick={e => {
-        if (postId !== undefined) {
-          postId.current = e.currentTarget.id
-        }
-      }}>
+      <div id={id} className="post"
+        style={{ opacity: opacity ? opacity : 1 }}
+      >
         {allPosts && 
-          <>
-            {creator === userAuth ?
-              <>
-                <Options func={func} creator={creator} /> 
-                <div className="upper-sect">
-                  <Link to={userId !== creator ? creator : ''}>
-                    <div className="upper-sect-img-div">
-                      <img src={user?.avatarUrl} alt="" />
-                    </div>
-    
-                    <div className="post-username-div">
-                      <p className="post-display-name">
-                        {user?.displayName}  {user?.userType === 'creator' && <img src={verifiedBadge} className='verified-badge' alt="" />}
-                      </p>
-                      <p className="post-username"> @{user?.username} </p>
-                    </div>
-                  </Link>
-        
-                  <div className='upper-sect-options' onClick={() => {
-                    setShowOptionsDiv(!showOptionsDIv)
-                  }}>
-                    <p>.</p>
-                    <p>.</p>
-                    <p>.</p>
-                  </div>
-                </div>
-    
-                <div className="middle-sect">
-                  {type === 'Text' &&
-                    <pre className='preRef'>
-                      {isLinkElement(body) ?
-                      
-                        <a className='out-link' href={body.includes('http://') || body.includes('https://') ? `${body}` : `http://${body}`} target='_blank'>
-                          {body?.length >= 300 && `${body.slice(0, 300)}...`} { body?.length >= 300 && <b> more </b>}
-                          {body?.length < 300 && body}
-                        </a>
-                        :
-                        <Link to={`/post/${id}`} className='in-link'>
-                          {body?.length >= 300 && `${body.slice(0, 300)}...`} { body?.length >= 300 && <b> more </b>}
-                          {body?.length < 300 && body}
-                        </Link>
-                      }
-                    </pre>
-                  }
-
-                  {type === 'Picture-Media' &&
-                    <div className="img-post-body-div">
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <img className='img-post-body' src={body} alt="" />
-                      </div>
-                    </div>
-                  }
-
-                  {type === 'Video-Media' &&
-                    <div className="img-post-body-div">
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <video controls className='img-post-body' src={body}></video>
-                      </div>
-                    </div>
-                  }
-                
-                  {type === 'Group-Media' &&
-                    <div ref={groupRef} className="img-post-body-div">
-
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <div className='group-media-div'>
-                          <div className="post-number">
-                            {index + 1}/{body.length}
-                          </div>
-                          <div ref={btnRef} className="scroll-posts postt">
-                            <button className='index-btn' style={{opacity: index === 0 && '0'}}
-                              onClick={() => {
-                                index !== 0 && setIndex(prev => prev - 1)
-                              }}
-                            >
-                              <FaAngleLeft />
-                            </button>
-      
-                            <button className='index-btn'  style={{opacity: index === body.length - 1 && '0'}}
-                              onClick={() => {
-                                index !== body.length - 1 && setIndex(prev => prev + 1)
-                              }}
-                            >
-                              <FaAngleRight />
-                            </button>
-                          </div>
-                          {body.map((item, i) => {
-                            return (
-                              <div key={i}>
-                                {item.type === 'img' ?
-                                  <>
-                                    {index === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media curr-media'
-                                      />
-                                    }
-
-                                    {(index + 1) === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media next-media'
-                                      />
-                                    }
-
-                                    {(index - 1) === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media prev-media'
-                                      />
-                                    }
-
-                                    {index !== i && (index + 1) !== i && (index - 1) !== i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media'
-                                      />
-                                    }
-                                  </>
-                                  :
-                                  item.type === 'video' &&
-                                  <>
-                                    {index === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media curr-media'
-                                      ></video>
-                                    }
-
-                                    {(index + 1) === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media next-media'
-                                      ></video>
-                                    }
-
-                                    {(index - 1) === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media prev-media'
-                                      ></video>
-                                    }
-
-                                    {index !== i && (index + 1) !== i && (index - 1) !== i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media'
-                                      ></video>
-                                    }
-                                  </>
-                                }
-                              </div>
-                            )
-                          })}
-      
-                        {body.map((item, i) => {
-                          return  item.type === 'img' ?
-                            <img key={i} src={item.url} alt=""
-                              className="img-post-body sample"
-                            /> 
-                          :
-                          item.type === 'video' &&
-                            <video key={i} src={item.url} controls
-                              className="vid-post-body sample"
-                              ></video>
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-    
-                <div className="lower-sect">
-                  <span className="post-time">
-                    <span>{time}</span>
-                    <span>{date} </span>
-                  </span>
-                  <span style={ likes.value.find(like => like === userAuth) ? { color: 'red' } : null } onClick={() => handleLike(id)}>
-                  <FaRegHeart style={ likes.value.find(like => like === userAuth) ? { color: 'red' } : null }/> {likes?.value?.length}
-                  </span>
-                  <span>
-                    <Link to={`/post/${id}`} >
-                      <FaRegComment /> {comments?.value?.length}
-                    </Link>
-                  </span>
-                <span onClick={() => {
-                  setShowShareMenu(true)
-                  setSelectedMessage({
-                    post: post, typeOf: 'post', type: post.type
-                  })
-                  }} > <FaShareSquare /> {shares?.value?.length} </span>
-                </div>
-              </>
-    
-              :
-    
-              <>
-                <OtherOption func={func} creator={creator}/> 
-                <div className="upper-sect">
-                  <Link to={userId !== creator ? creator : ''}>
-                    <div className="upper-sect-img-div">
-                      <img src={user?.avatarUrl} alt="" />
-                    </div>
-    
-                    <div className="post-username-div">
-                      <p className="post-display-name">
-                        {user?.displayName}  {user?.userType === 'creator' && <img src={verifiedBadge} className='verified-badge' alt="" />}
-                      </p>
-                      <p className="post-username"> @{user?.username} </p>
-                    </div>
-                  </Link>
-        
-                  <div className='upper-sect-options' onClick={() => {
-                    setShowOtherOptionsDiv(!showOtherOptionsDIv)
-                  }}>
-                    <p>.</p>
-                    <p>.</p>
-                    <p>.</p>
-                  </div>
-                </div>
-    
-                <div className="middle-sect">
-                  {type === 'Text' &&
-                    <pre className='preRef'>
-                      {isLinkElement(body) ?
-                      
-                        <a className='out-link' href={body.includes('http://') || body.includes('https://') ? `${body}` : `http://${body}`} target='_blank'>
-                          {body?.length >= 300 && `${body.slice(0, 300)}...`} { body?.length >= 300 && <b> more </b>}
-                          {body?.length < 300 && body}
-                        </a>
-                        :
-                        <Link to={`/post/${id}`} className='in-link'>
-                          {body?.length >= 300 && `${body.slice(0, 300)}...`} { body?.length >= 300 && <b> more </b>}
-                          {body?.length < 300 && body}
-                        </Link>
-                      }
-                    </pre>
-                  }
-
-                  {type === 'Picture-Media' &&
-                    <div className="img-post-body-div">
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <img className='img-post-body' src={body} alt="" />
-                      </div>
-                    </div>
-                  }
-
-                  {type === 'Video-Media' &&
-                    <div className="img-post-body-div">
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <video controls className='img-post-body' src={body}></video>
-                      </div>
-                    </div>
-                  }
-                
-                  {type === 'Group-Media' &&
-                    <div ref={groupRef} className="img-post-body-div">
-
-                      <pre className='preRef'>
-                        {isLinkElement(caption) ?
-                        
-                          <a className='out-link' href={caption.includes('http://') || caption.includes('https://') ? `${caption}` : `http://${caption}`} target='_blank'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </a>
-                          :
-                          <Link to={`/post/${id}`} className='in-link'>
-                            {caption?.length >= 300 && `${caption.slice(0, 300)}...`} { caption?.length >= 300 && <b> more </b>}
-                            {caption?.length < 300 && caption}
-                          </Link>
-                        }
-                      </pre>
-                      <div onClick={e => linkTo(e, id)} className='in-link'>
-                        <div className='group-media-div'>
-                          <div className="post-number">
-                            {index + 1}/{body.length}
-                          </div>
-                          <div ref={btnRef} className="scroll-posts postt">
-                            <button className='index-btn' style={{opacity: index === 0 && '0'}}
-                              onClick={() => {
-                                index !== 0 && setIndex(prev => prev - 1)
-                              }}
-                            >
-                              <FaAngleLeft />
-                            </button>
-      
-                            <button className='index-btn'  style={{opacity: index === body.length - 1 && '0'}}
-                              onClick={() => {
-                                index !== body.length - 1 && setIndex(prev => prev + 1)
-                              }}
-                            >
-                              <FaAngleRight />
-                            </button>
-                          </div>
-                          {body.map((item, i) => {
-                            return (
-                              <div key={i}>
-                                {item.type === 'img' ?
-                                  <>
-                                    {index === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media curr-media'
-                                      />
-                                    }
-
-                                    {(index + 1) === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media next-media'
-                                      />
-                                    }
-
-                                    {(index - 1) === i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media prev-media'
-                                      />
-                                    }
-
-                                    {index !== i && (index + 1) !== i && (index - 1) !== i &&
-                                      <img key={i} src={item.url} alt=""
-                                        className='img-post-body group-media'
-                                      />
-                                    }
-                                  </>
-                                  :
-                                  item.type === 'video' &&
-                                  <>
-                                    {index === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media curr-media'
-                                      ></video>
-                                    }
-
-                                    {(index + 1) === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media next-media'
-                                      ></video>
-                                    }
-
-                                    {(index - 1) === i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media prev-media'
-                                      ></video>
-                                    }
-
-                                    {index !== i && (index + 1) !== i && (index - 1) !== i &&
-                                      <video key={i} src={item.url} alt="" controls
-                                        className='vid-post-body group-media'
-                                      ></video>
-                                    }
-                                  </>
-                                }
-                              </div>
-                            )
-                          })}
-      
-                        {body.map((item, i) => {
-                          return  item.type === 'img' ?
-                            <img key={i} src={item.url} alt=""
-                              className="img-post-body sample"
-                            /> 
-                          :
-                          item.type === 'video' &&
-                            <video key={i} src={item.url} controls
-                              className="vid-post-body sample"
-                              ></video>
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-    
-                <div className="lower-sect">
-                  <span className="post-time">
-                    <span>{time}</span>
-                    <span>{date} </span>
-                  </span>
-                  <span style={ likes.value.find(like => like === userAuth) ? { color: 'red' } : null } onClick={() => handleLike(id)}>
-                  <FaRegHeart style={ likes.value.find(like => like === userAuth) ? { color: 'red' } : null }/> {likes?.value?.length}
-                  </span>
-                  <span>
-                    <Link to={`/post/${id}`} >
-                      <FaRegComment /> {comments?.value?.length}
-                    </Link>
-                  </span>
-                <span onClick={() => {
-                  setShowShareMenu(true)
-                  setSelectedMessage({
-                    post: post, typeOf: 'post', type: post.type
-                  })
-                  }} > <FaShareSquare /> {shares?.value?.length} </span>
-                </div>
-              </>
-            }
-          </>
-          }
+          <PostSections post={post} 
+            postCreator={isProcessing ? user : postCreator} 
+            isProcessing={isProcessing}
+            comments={comments}
+            postLink={postLink ? postLink : `/posts/${id}`}
+          /> 
+        }
       </div>
     )
   }
 }
 
 export default Post
+
+
+
+
+
+
+const PostSections = ({ post, postCreator, isProcessing, comments, postLink }) => {
+  const { setShowShareMenu, selectedMessage, setSelectedMessage, user, setShowPostForm, setPostFormFor, setPostFormIDs, postFormIDs
+  } = useContext(appContext)
+  const { likePost, bookmarkPost, removeBookmarkedPost, deletePost } = useContext(functionsContext)
+  
+  const { id, media, date, likes, caption, type, shares } = post
+  const { id: creatorId, username, displayName, userType } = postCreator
+
+  const [showOptionsDiv, setShowOptionsDiv] = useState(false)
+
+  const optionId = useRef(null)
+  
+  const navigate = useNavigate()
+
+  const postLinkTo = (e) => {
+    if (e.target.nodeName !== 'path'
+      && e.target.nodeName !== 'svg'
+      && e.target.nodeName !== 'BUTTON'
+    ) {
+      e.preventDefault()
+      navigate(`/posts/${id}`)
+    }
+  }
+
+
+  const callDeletePost = () => deletePost(id);
+  const callRemoveBookmarkedPost = () => removeBookmarkedPost(id);
+  const callBookmarkPost = () => bookmarkPost(id, id);
+
+
+  const functionsForOption = [
+    ...(user?.id && user.id === creatorId ? [{ text: 'Delete post', func: callDeletePost, color: 'red' }] : []),
+
+    ...(user?.id && user.postSaves.value.find(save => save.postId === id) ?
+      [{ text: 'Remove from bookmarked posts', func: callRemoveBookmarkedPost }] :
+      [{ text: 'Bookmark post', func: callBookmarkPost }]),
+  ];
+
+
+
+  return (
+    <>
+      <div className="upper-sect">
+        {user?.id &&
+          <Options
+            optionId={optionId} functions={functionsForOption}
+            setShowOptionsDiv={setShowOptionsDiv} showOptionsDiv={showOptionsDiv}
+          />
+        }
+        
+        <a href={`/${username}`}>
+          <div className="upper-sect-img-div">
+            <UserPfp user={postCreator} />
+          </div>
+
+          <div className="post-username-div">
+            <p className="post-display-name">
+              <span>
+                {displayName} 
+              </span> 
+
+              {userType === 'creator' && 
+                <VerifiedBadge />
+              }
+            </p>
+            <p className="post-username"> @{username} </p>
+          </div>
+        </a>
+
+        <div className='upper-sect-options'
+          onClick={() => {
+            optionId.current = id
+            setShowOptionsDiv(!showOptionsDiv)
+          }}
+        >
+          <MoreHorizIcon />
+        </div>
+      </div>
+
+      <div className="middle-sect">
+        {type === 'Text' &&
+          <PostCaption caption={caption} postLink={postLink} />
+        }
+
+        {type === 'Picture-Media' &&
+          <div className="img-post-body-div">
+            <PostCaption caption={caption} postLink={postLink} />
+            
+            <div onClick={e => postLinkTo(e)} className='in-link'>
+              <img  className='img-post-body' src={media} alt="" />
+            </div>
+          </div>
+        }
+
+        {type === 'Video-Media' &&
+          <div className="img-post-body-div">
+            <PostCaption caption={caption} postLink={postLink} />
+
+            <div onClick={e => postLinkTo(e)} className='in-link'>
+              <Video haveControls={true} classname='img-post-body' source={media} />
+            </div>
+          </div>
+        }
+      
+        {type === 'Group-Media' &&
+          <div className="img-post-body-div">
+          <PostCaption caption={caption} postLink={postLink} />
+
+            <GroupMedia
+              linkTo={postLinkTo} post={post}
+            />
+          </div>
+        }
+      </div>
+
+      {!isProcessing &&
+        <div className="lower-sect">
+          <span className="post-time">
+            {/* <span>{time}</span> */}
+            <span>{date} </span>
+          </span>
+
+          <span style={likes.value.find(like => like === user.id) ? { color: 'red' } : null} onClick={() => {
+            if (user && user.id) {
+              likePost(post)
+            }
+          }}>
+            {likes.value.find(like => like === user.id) ? 
+              <FavoriteIcon style={{ color: 'red' }} />
+              :
+              <FavoriteBorderIcon />
+            }
+            <span className='lower-sect-number'>
+              {likes.value?.length}
+            </span>
+          </span>
+
+          <span>
+            <Link to={`/posts/${id}`} role="button"
+              onClick={() => {
+                if (user && user.id) {
+                  setShowPostForm(true)
+                  setPostFormFor("comment")
+                  setPostFormIDs({...postFormIDs, postId: id})
+                }
+              }}
+            >
+              <FaRegComment />
+
+              <span className='lower-sect-number'>
+                {comments.length}
+              </span>
+            </Link>
+          </span>
+        
+          <span 
+            onClick={() => {
+              if (user && user.id) {
+                setShowShareMenu(true)
+                setSelectedMessage({
+                  ...selectedMessage, postId: "", post, creator: postCreator,
+                })
+              }
+            }}
+          >
+            <IosShareIcon />
+            <span className='lower-sect-number'>
+              {shares?.value?.length} 
+            </span>
+          </span>
+        </div>
+      }
+    </>
+  )
+}
+
+
+
+
+
+
+
+

@@ -1,53 +1,80 @@
-import React, { useContext, useRef, useState } from 'react'
-import { FaSearch, FaPlus } from 'react-icons/fa'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import { FaSearch } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { appContext } from '../App'
-import Footer from '../Components/Footer'
-import Form from '../Components/Form'
-import Header from '../Components/Header'
-import Nav from '../Components/Nav'
-import SearchResult from '../Components/SearchResult'
+import Footer from '../COMPONENTS/Footer'
+import LoginMessage from '../COMPONENTS/GENERAL-COMPONENTS/LoginMessage'
+import UserPfp from '../COMPONENTS/GENERAL-COMPONENTS/UserPfp'
+import Header from '../COMPONENTS/Header'
+import Nav from '../COMPONENTS/Nav'
+import SearchResult from '../COMPONENTS/SearchResult'
+import NewPostIcon from '../ICONS/NewPostIcon'
 
 const Search = () => {
-  const {setShowForm, user, users, windowWidth} = useContext(appContext)
+  const { setShowPostForm, user, users, windowWidth, suggestedAccounts } = useContext(appContext)
   const [searchResult, setSearchResult] = useState([])
-  const search = useRef()
+  const [search, setSearch] = useState('')
   const navigate = useNavigate()
 
-  const handleSearch = () => {
-    setSearchResult(users.filter(user => user.username.includes(search.current.value)))
-  }
+  
+  useEffect(() => {
+    if (search === '') {
+      setSearchResult([])
+
+    } else {
+      setSearchResult(users.filter(user =>
+        user.username.toLowerCase().trim().includes(search.toLowerCase().trim()) ||
+        user.displayName.toLowerCase().trim().includes(search.toLowerCase().trim())
+      ))
+    }
+  }, [search])
+
+
+
 
   return (
-    <main className="search-main" role={'button'} onClick={() => setShowForm(false)}>
-      {windowWidth > 799 && <Header />}
-      {windowWidth > 799 && <Nav />}
+    <main className="search-main" role={'button'} onClick={() => setShowPostForm(false)}>
+      {windowWidth > 699 && <Header />}
+      {windowWidth > 699 && <Nav />}
+
+      <LoginMessage />
+      
       <header className="search-header">
+        <div className="search-header-pfp-div">
+          <UserPfp user={user} />
+        </div>
+        
         <div className="search-bar-div">
           <FaSearch />
-          <input autoComplete='off' className='search-input' type="text" placeholder='Search users' ref={search} onChange={e => {
-            handleSearch()
-          } } />
-        </div>
-
-        <div className="search-header-pfp-div">
-          <img src={user?.avatarUrl} alt="" />
+          <input autoComplete='off' className='search-input'
+            type="text" placeholder='Search users' value={search}
+            onChange={e => setSearch(e.target.value)} />
         </div>
       </header>
 
       <section className="search-results">
-        {searchResult.map(result => <SearchResult key={result.id} result={result} /> )}
-      </section>
-      <button className='new-post-icon' onClick={() => {
-        if (user) {
-          setShowForm(true)
-        } else {
-          navigate('/login')
+
+        {searchResult.length === 0 ?
+          <section className='suggested-accounts'>
+            <h2>
+              Suggested accounts
+            </h2>
+
+            {suggestedAccounts.map(result => {
+              return (
+                <SearchResult key={result.id} result={result} suggested={true} />
+              )
+            } )}
+          </section>
+          :
+          <>
+            {searchResult.map(result => <SearchResult key={result.id} result={result} /> )}
+          </>
         }
-      } }>
-        <FaPlus />
-      </button>
-      <Form />
+      </section>
+      
+      <NewPostIcon />
+
       <Footer />
     </main>
   )

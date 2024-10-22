@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { FaPlus, FaAngleLeft, FaAngleRight, FaEye, FaTrashAlt } from 'react-icons/fa'
 import { appContext } from '../App'
 
 const ChatViewModal = ({selectedMediaId, selectedMediaType}) => {
@@ -144,8 +145,20 @@ const ChatViewModal = ({selectedMediaId, selectedMediaType}) => {
         <div style={{height: '20px', right: '20px'}}></div>
       </div>
 
-      <div className="div-one" onClick={() => index !== 0 && setIndex(prev => prev - 1)}></div>
-      <div className="div-two" onClick={() => index < mediaLength - 1 && setIndex(prev => prev + 1)}></div>
+      <div className="div-one" onClick={() => index !== 0 && setIndex(prev => prev - 1)}>
+        {index !== 0 &&
+          <button>
+            <FaAngleLeft />
+          </button>
+        }
+      </div>
+      <div className="div-two" onClick={() => index < mediaLength - 1 && setIndex(prev => prev + 1)}>
+        {index < mediaLength - 1 && 
+          <button>
+           <FaAngleRight />
+         </button>
+        }
+      </div>
 
       <article ref={modalArticle} className="chat-modal-item-view">
       </article>

@@ -3,7 +3,7 @@ import { appContext } from '../App'
 import { FaReact } from 'react-icons/fa'
 
 const MessagesHeader = () => {
-  const { user, windowWidth, setShowForm, setShowReplyForm, setShowReplyReplyForm, homeLoading } = useContext(appContext)
+  const { user, windowWidth, setShowForm, setShowReplyForm, setShowReplyReplyForm, homeLoading, userAuth } = useContext(appContext)
 
   const close = () => {
     setShowForm(false)
@@ -14,16 +14,16 @@ const MessagesHeader = () => {
   if(homeLoading) {
     return (
       <header className="messages-header home-header" role={'button'} onClick={close}>
-        {windowWidth > 800 && <FaReact />}
+        {windowWidth > 699 && <FaReact />}
   
-        {windowWidth < 800 &&
+        {windowWidth < 700 &&
           <>
             <div className="pfp-div">
               <div></div>
             </div>
   
             <div className='app-title-div'>
-              <h1> WoWi </h1>
+              <h1> LinkUp </h1>
             </div>
           </>
         }
@@ -32,16 +32,20 @@ const MessagesHeader = () => {
   } else {
     return (
       <header className="messages-header home-header" role={'button'} onClick={close}>
-        {windowWidth > 800 && <FaReact />}
+        {windowWidth > 699 && <FaReact />}
   
-        {windowWidth < 800 &&
+        {windowWidth < 700 &&
           <>
             <div className="pfp-div">
+            {user?.avatarUrl === '' || !userAuth ?
+              <div className='empty-header-pfp'></div>
+              :
               <img src={user?.avatarUrl} alt="" />
+            }
             </div>
   
             <div className='app-title-div'>
-              <h1> WoWi </h1>
+              <h1> LinkUp </h1>
             </div>
           </>
         }

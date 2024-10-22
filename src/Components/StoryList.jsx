@@ -1,26 +1,33 @@
 import React, { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { appContext } from '../App'
-import verifiedBadge from '../Images/verified-badge.jpg'
+import VerifiedBadge from "../COMPONENTS/GENERAL-COMPONENTS/VerifiedBadge"
+import UserPfp from './GENERAL-COMPONENTS/UserPfp'
 
-const StoryList = ({viewer}) => {
-  const {users} = useContext(appContext)
+
+const StoryList = ({ viewer }) => {
+  const { users } = useContext(appContext)
   const [user, setUser] = useState(users.find(user => user.id === viewer))
 
-  return (
-    <Link to={`/${user?.id}`} className="friends-list">
-      <div className="search-result-img-div">
-        <img src={user?.avatarUrl} alt="" />
-      </div>
-      <div className="search-result-username">
-        <p>
-          @{user?.username} 
-          {user?.userType === 'creator' && <img className='story-verified-badge' src={verifiedBadge} alt="" />}
-        </p>
-        <p> {user?.displayName} </p>
-      </div>
-    </Link>
-  )
+
+  if (user && user.id) {
+    const { username, avatarUrl, displayName, userType } = user
+
+    return (
+      <a href={`/${username}`} className="friends-list">
+        <div className="search-result-img-div">
+          <UserPfp user={user} />
+        </div>
+
+        <div className="search-result-username">
+          <p>
+            {displayName} 
+            {userType === 'creator' && <VerifiedBadge />}
+          </p>
+          <p> @{username}</p>
+        </div>
+      </a>
+    )
+  }
 }
 
 export default StoryList

@@ -1,2430 +1,490 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { appContext } from '../App'
-import { FaReply, FaEllipsisH } from 'react-icons/fa'
-import ReplyMessage from './ReplyMessage'
+import ReplyMessage from './ReplyMessageAttachment'
+import ReplyIcon from '@mui/icons-material/Reply';
+import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import { copyText } from '../GENERAL-FUNCTIONS/functions';
+import { motion } from 'framer-motion';
+import { messageRoomsRef } from '../firebase/config';
+import { doc, updateDoc } from 'firebase/firestore';
+import { functionsContext } from '../CONTEXTS/FunctionsContext';
+import ChopText from './GENERAL-COMPONENTS/ChopText';
+import Video from './GENERAL-COMPONENTS/Video';
+import { messagingContext } from './MESSAGING-COMPONENTS/Messaging';
+import ReplyMessageAttachment from './ReplyMessageAttachment';
 
-const Message = ({ message, type, currentUserPage, messageId, x, y, deleteMessage, replyMessageType, selectedMediaId, selectedMediaType, scrollTop, deleteMessageII }) => {
-  const { userAuth, users, allPosts, followStory, storyType, showChatModal, setShowChatModal } = useContext(appContext)
-  const [showMore, setShowMore] = useState(false)
 
-  const [post, setPost] = useState()
-  const [comment, setComment] = useState()
-  const [reply, setReply] = useState()
-  const location = useLocation()
-  const [imgWidth, setImgWidth] = useState(0)
-  const [vidWidth, setVidWidth] = useState(0)
 
-  useEffect(() => {
-    if (type === 'Text-post' ||
-      type === 'Picture-Media-post' ||
-      type === 'Video-Media-post' ||
-      type === 'Group-Media-post' 
-    ) {
-      setPost(allPosts.find(post => post.id === message.postId))
-    }
-  }, [message])
+const messageContext = React.createContext()
 
-  useEffect(() => {
-    if (type === 'Text-Comment-comment' ||
-      type === 'Photo-Comment-comment' ||
-      type === 'Video-Comment-comment' ||
-      type === 'Group-Comment-comment' 
-    ) {
-      const post = allPosts.find(post => post.id === message.postId)
-      setComment(post?.comments.value.find(comment => comment.id === message.commentId))
-    }
-  }, [message])
 
-  useEffect(() => {
-    if (type === 'Text-Reply-reply' ||
-      type === 'Photo-Reply-reply' ||
-      type === 'Video-Reply-reply' ||
-      type === 'Group-Reply-reply' 
-    ) {
-      const post = allPosts.find(post => post.id === message.postId)
-      const comment = post?.comments.value.find(comment => comment.id === message.commentId)
-      setReply(comment?.replies.value.find(reply => reply.id  === message.replyId))
-    }
-  }, [message])
+const Message = ({ message, isLastMessage }) => {
+  const { user, showChatModal } = useContext(appContext)
+  const { isLinkElement } = useContext(functionsContext)
+  const { otherUser, thisRoom, dmUrl, replyMessage, setIsReply } = useContext(messagingContext)
 
-  useEffect(() => {
-    const tpDivs = document.querySelectorAll('.tp-div')
+  const { id, creator, media, replyMessage: messageRepliedTo, post, type, story } = message
 
-    tpDivs.forEach(div => {
-      const textPostInfo = div.querySelector('.text-post-info')
-      const overlay = div.querySelector('.text-post-overlay')
-      div.addEventListener('mouseover', () => {
-        textPostInfo ? textPostInfo.style.zIndex = '11' : console.log()
-        overlay ? overlay.style.zIndex = '10' : console.log()
-      })
-    })
+  const [dragDistance, setDragDistance] = useState(0);
+  const [isUserCreator, setIsUserCreator] = useState(creator === user.id)
 
-    tpDivs.forEach(div => {
-      const textPostInfo = div.querySelector('.text-post-info')
-      const overlay = div.querySelector('.text-post-overlay')
-      div.addEventListener('mouseout', () => {
-        textPostInfo ? textPostInfo.style.zIndex = '-11' : console.log()
-        overlay ? overlay.style.zIndex = '-10' : console.log()
-      })
-    })
-  }, [])
+  const resizeMedia = useRef([])
+  const resizeMediaRef = el => el && resizeMedia.current.push(el)
+  
 
-  useEffect(() => {
-    const messagesRight = document.querySelectorAll('.message .align-right')
-    const messagesLeft = document.querySelectorAll('.message .align-left')
-    const videos = document.querySelectorAll('video')
-
-    // console.log(messagesRight)
-    // console.log(messagesLeft)
-
-    function click(e) {
-      // videos.forEach(video => video.pause())
-      // console.log(e.target)
-      let clicks = 0
-      if (e.currentTarget.nodeName === 'IMG' ||
-        e.currentTarget.nodeName === 'VIDEO' ||
-        e.target.nodeName === 'IMG' ||
-        e.target.nodeName === 'VIDEO')
-      {
-      clicks += 1
-      if (e.currentTarget !== null) {
-        selectedMediaType.current = e.currentTarget.dataset.type
-        selectedMediaId.current = e.currentTarget.dataset.val
-      } else if (e.target !== null) {
-        selectedMediaType.current = e.target.dataset.type
-        selectedMediaId.current = e.target.dataset.val
-      }
-        
-        setTimeout(() => {
-          if (clicks < 2) {
-            setShowChatModal(true)
-            clicks = 0
-          }
-        }, 500);
-      }
-
-      if (e.currentTarget.nodeName === 'VIDEO') {
-        e.currentTarget.pause()
-      } else if (e.target.nodeName === 'VIDEO') {
-        e.target.pause()
-      }
-    }
-
-    messagesRight.forEach(message => {
-      message.addEventListener('click', click)
-    })
-
-    messagesLeft.forEach(message => {
-      message.addEventListener('click', click)
-    })
+  function isElementTouchingRegion(element, region) {
+    const regionRect = region.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
     
-    return () => {
-      messagesRight.forEach(message => {
-        message.removeEventListener('click', click)
-      })
+    const touchingTop = rect.top <= regionRect.top;
+    const touchingBottom = rect.bottom >= regionRect.bottom;
+    const touchingLeft = rect.left <= regionRect.left;
+    const touchingRight = rect.right >= regionRect.right;
+  
+    return {
+      touchingTop,
+      touchingBottom,
+      touchingLeft,
+      touchingRight
+    };
+  }
 
-      messagesLeft.forEach(message => {
-        message.removeEventListener('click', click)
+
+  function isElementInsideRegion(element, region) {
+    const regionRect = region.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    
+    const topBelowBottom = rect.top >= regionRect.bottom;
+    const bottomAboveTop = rect.bottom <= regionRect.top;
+  
+    return {
+      topBelowBottom,
+      bottomAboveTop
+    };
+  }
+
+
+  function showOptionsSpan(messageId) {
+    const optionsSpan = document.querySelector(`${messageId} .options-span`);
+
+    if (optionsSpan) {
+      optionsSpan.classList.add("active");
+    }
+  }
+
+
+  function hideOptionsSpan(messageId) {
+    const optionsSpan = document.querySelector(`${messageId} .options-span`);
+    
+    setTimeout(() => {
+      if (optionsSpan) {
+        optionsSpan.classList.remove("active");
+      }
+    }, 2000);
+  }
+
+
+
+  useEffect(() => {
+    function windowResize() {
+      resizeMedia.current.forEach(media => {
+        if (media) {
+          const elementId = `[id='${id.toString()}']`
+          const div = document.querySelector(elementId)
+          const pre = document.querySelector(`${elementId} pre`)
+          const creatorDiv = document.querySelector(`${elementId} div.post-message-creator`)
+          
+          if (media.getBoundingClientRect().width > 100) {
+            if (div) {
+              div.style.width = `${media.getBoundingClientRect().width}px`
+            }
+        
+            if (creatorDiv) {
+              creatorDiv.style.width = `${media.getBoundingClientRect().width}px`
+            }
+        
+            if (pre && pre.classList.contains('resize')) {
+              pre.style.width = `${media.getBoundingClientRect().width}px`
+            }
+          }
+        }
       })
     }
+
+    window.addEventListener('resize', windowResize)
+
+    return () => {
+      window.removeEventListener('resize', windowResize)
+    }
   }, [])
+
+
+
+
+  useEffect(() => {
+    const messagingSection = document.querySelector('.messaging-section')
+    const messages = document.querySelectorAll('.message');
+    
+    function windowScroll() {
+      const videos = document.querySelectorAll('video')
+      const messagesArea = document.querySelector('.messaging-area')
+
+      videos.forEach(video => {
+        if (video && messagesArea) {
+          const result = isElementInsideRegion(video, messagesArea)
+
+          const { topBelowBottom, bottomAboveTop } = result
+
+          if (topBelowBottom || bottomAboveTop) {
+            video.pause()
+          }
+        }
+      })
+    }
+
+
+
+    
+
+    
+
+    messages.forEach(message => {
+      if (message) {
+        const id = message.id;
+        const messageId = `[id='${id.toString()}']`;    
+
+        // Pass a function to the event listener
+        message.addEventListener('mouseenter', () => showOptionsSpan(messageId));
+        message.addEventListener('mouseleave', () => hideOptionsSpan(messageId));
+      }
+    });
+
+
+
+
+
+    messagingSection?.addEventListener('scroll', windowScroll)
+
+    return () => {
+      messagingSection?.removeEventListener('scroll', windowScroll)
+    }
+  }, [])
+
+
 
   useEffect(() => {
     const videos = document.querySelectorAll('.message video')
     videos.forEach(video => video.pause())
   }, [showChatModal])
 
-  function mouseenter(e) {
-    const message = e.currentTarget
-    // selectedMediaType.current = e.currentTarget.dataset.type
-    // selectedMediaId.current = e.currentTarget.dataset.val
-    messageId.current = e.currentTarget.id
-    replyMessageType.current = e.currentTarget.dataset.type
+  
 
-    const messagesSect = document.querySelector('.messages-sect')
-    let parentDiv
-
-    if (e.currentTarget.querySelector('.align-right')) {
-      parentDiv = e.currentTarget.querySelector('.align-right')
-    } else {
-      parentDiv = e.currentTarget.querySelector('.align-left')
-    }
+  function checkResize(e) {
+    const image = e.currentTarget
     
-    const coordinates = parentDiv.getBoundingClientRect()
+    // if (image.naturalWidth / image.naturalHeight > image.clientWidth / image.clientHeight) {
+    //   image.style.height = 'auto';
+    //   image.style.width = '100%';
+    // } else {
+    //   image.style.width = 'auto';
+    //   image.style.height = '100%';
+    // }
+  }
 
-    //use align right and align left
-    const coord = e.target.parentElement
-    const span = parentDiv?.querySelector('.message-options')
 
-    span.style.visibility = 'visible'
-    span.style.opacity = 1
-    span.addEventListener('click', function (e) {
-      deleteMessage.current.classList.add('show-del-div')
-      // deleteMessageII.current.classList.add('show-del-div')
-      span.style.visibility = 'hidden'
-      span.style.opacity = 0
-      if (message.querySelector('.align-right')) {
-        deleteMessage.current.style.right = `${coordinates.width + 20}px` 
-        deleteMessage.current.style.top = `${e.target.getBoundingClientRect().bottom}px`
-      } else {
-        const width = messagesSect.getBoundingClientRect().width
-        // deleteMessage.current.style.right = `${coordinates.width + 10 + 80}px`
-        deleteMessage.current.style.right = `${width - coordinates.width - 120}px`
-        deleteMessage.current.style.top = `${e.target.getBoundingClientRect().bottom}px`
+
+
+  function resizePre(e) {
+    const media = e.currentTarget
+    const elementId = `[id='${id.toString()}']`
+    const div = document.querySelector(elementId)
+    const pre = document.querySelector(`${elementId} pre`)
+    const creatorDiv = document.querySelector(`${elementId} div.post-message-creator`)
+
+    if (media.getBoundingClientRect().width > 100) {
+      if (div) {
+        div.style.width = `${media.getBoundingClientRect().width}px`
       }
-      // console.log(coordinates)
-    })
-  }
-
-  function mouseleave(e) {
-    // const messageDiv = document.querySelector(`[class^="${e.currentTarget.id}"]`)
-    let parentDiv
-
-    if (e.currentTarget.querySelector('.align-right')) {
-      parentDiv = e.currentTarget.querySelector('.align-right')
-    } else {
-      parentDiv = e.currentTarget.querySelector('.align-left')
-    }
-    const span = parentDiv?.querySelector('.message-options')
-    // console.log(e.target)
-
-    let keep = false
-
-    span.addEventListener('mouseenter', function (e) {
-      keep = true
-    })
-
-    span.addEventListener('mouseleave', function (e) {
-      setTimeout(() => {
-        span.style.visibility = 'hidden'
-        span.style.opacity = 0
-      }, 2000);
-    })
-
-    setTimeout(() => {
-      if (!keep) {
-        span.style.visibility = 'hidden'
-        span.style.opacity = 0
+  
+      if (creatorDiv) {
+        creatorDiv.style.width = `${media.getBoundingClientRect().width}px`
       }
-    }, 2000);
-  }
-
-  function resize(e) {
-    // console.log('resize')
-    const overlay = document.querySelector(`[id='${message.id}'] .group-media-container-overlay`)
-    const img = e.currentTarget
-    overlay.style.width = `${img.getBoundingClientRect().width}px`
-    overlay.style.height = `${img.getBoundingClientRect().height}px`
-  }
-
-  function isLinkElement(textContent) {
-    // Check if the element has a link-like appearance (e.g., starts with 'http', 'https', 'www', or 'ftp')
-    const text = textContent;
-    
-    const linkLikeRegexB = /^(https?|www\.|ftp)/gi;
-    const linkLikeRegexE = /(\.com|\.de|\.org|\.net|\.us|\.co|\.edu|\.gov|\.biz|\.za|\.info|\.cc|\.ca|\.cn|\.fr|\.ch|\.au|\.in|\.jp|\.be|\.it|\.nl|\.uk|\.mx|\.no|\.ru|\.br|\.se|\.es|\.at|\.dk|\.eu|\.il)$/gi;
-
-    if (linkLikeRegexB.test(text) || linkLikeRegexE.test(text)) {
-      return true
-    } else {
-      return false 
+  
+      if (pre && pre.classList.contains('resize')) {
+        pre.style.width = `${media.getBoundingClientRect().width}px`
+      }
     }
   }
+
+
+  useEffect(() => {
+    if (dragDistance > 70) {
+      replyMessage.current = message
+      setIsReply(true)
+    }
+  }, [dragDistance])
+
+
+
 
   return (
-    <>
-      
-      
-      {type === 'text-message' &&
-        <div id={message.id} data-type='text-message' className='messages-sect-message message' 
-          onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'align-right' : 'align-left' }>
-            <div className='message-options'>
-              <FaEllipsisH />
-            </div>
-            <pre className={message.creator === userAuth ? 'message-body right' : 'message-body'}>
-              {message?.body.length < 301 &&
-                <>
-                  {isLinkElement(message?.body) ?
-                        
-                    <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                      {message?.body}
-                    </a>
-                    :
-                    <>
-                      {message?.body}
-                    </>
-                  }
-                </>
-              }
+    <messageContext.Provider
+      value={{
+        message, otherUser, isLastMessage, thisRoom, dmUrl, post, isUserCreator, checkResize, resizeMediaRef, resizePre, isElementTouchingRegion, hideOptionsSpan
+      }}
+    >
+      <motion.div id={id}
+        className={`message ${isUserCreator ? "align-right" : "align-left"}`}
+        // drag="x"
+        // dragConstraints={{ left: 100, right: 100 }}
+        // whileDrag={{ scale: 1.2 }}
+        // dragSnapToOrigin={true}
+        // onDrag={(event, info) => {
+        //   const newX = Math.max(0, Math.min(100, info.offset.x)); 
+        //   setDragDistance(newX); 
+        // }}
+        // dragMomentum={false}
+      >
+        {type === 'text-message' &&
+          <TypedMessage />
+        }
 
-              {message.body.length > 300 &&
-                <>
-                  {showMore &&
-                    <>
-                      {isLinkElement(message?.body) ?
-                            
-                        <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                          {message?.body}
-                        </a>
-                        :
-                        <>
-                          {message?.body}
-                          <b onClick={() => setShowMore(!showMore)}>
-                            {showMore ? 'less' : 'more'}
-                          </b>
-                        </>
-                      }
-                    </>
-                  }
 
-                  {!showMore && 
-                    <>
-                    
-                    
-                      {isLinkElement(message?.body) ?
-                            
-                        <a className='out-link' href={message?.body.includes('http://') || message?.body.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                          {message?.body?.length >= 300 && `${message?.body.slice(0, 300)}...`} { message?.body?.length >= 300 && <b> more </b>}
-                          {message?.body?.length < 300 && message?.body}
-                        </a>
-                        :
-                        <>
-                          {message?.body.length >= 300 && `${message?.body.slice(0, 300)}...`} {message?.body.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                        </>
-                      }
-                    </>
-                  }
-                </>
-              }
-            </pre>
-            <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-              { message.time }
-            </span>
-          </div> 
-        </div>
-      }
+        {type === 'photo-message' &&
+          <TypedMessage>
+            <PhotoMessage media={media}/>
+          </TypedMessage>
+        }
 
-      {type === 'photo-message' &&
-        <div id={message.id} data-type='photo-message' data-val={message.body} className='messages-sect-message message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'align-right' : 'align-left'} data-type='photo-message' data-val={message.body}>
-            <div className='message-options'>
-              <FaEllipsisH />
-            </div>
+        
+        {type === 'video-message' &&
+          <TypedMessage>
+            <VideoMessage media={media}/>
+          </TypedMessage>
+        }
 
-            <div className={message.creator === userAuth ? 'img-message-body right' : 'img-message-body'}>
-              <img className='img' src={message.body} data-type='photo-message' data-val={message.body}
-                onLoad={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                }} 
+
+        {type === 'group-media-message' &&
+          <TypedMessage>
+            <GroupMediaMessage media={media}/>
+          </TypedMessage>
+        }
+
+
+        {type === 'Text' && post &&
+          <PostMessage num={300} bgc={true} />
+        }
+
+
+        {type === 'Picture-Media' && post &&
+          <PostMessage>
+            <img ref={resizeMediaRef} src={post.media} alt=""
+              onLoad={e => resizePre(e)}
+            />
+          </PostMessage>
+        }
+
+
+        {type === 'Video-Media' && post &&
+          <PostMessage>
+            <Video haveControls={true} source={post.media}
+              onLoadedData={resizePre} videoRef={resizeMediaRef} 
+            />
+          </PostMessage>
+        }
+
+
+        {type === 'Group-Media' && post && 
+          <PostMessage>
+            {post.media[0].type === 'img' ?
+              <img ref={resizeMediaRef} src={post.media[0].url} alt=""
+                onLoad={e => resizePre(e)}
               />
-              <pre>
-              {message?.caption.length < 301 &&
-                <>
-                  {isLinkElement(message?.caption) ?
-                        
-                    <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                      {message?.caption}
-                    </a>
+            :
+              <Video haveControls={true} source={post.media[0].url}
+                onLoadedData={resizePre} videoRef={resizeMediaRef} 
+              />
+            }
+          </PostMessage>
+        }
+
+
+        {type === 'story-text-message' && // reply a story with a text
+          <RepliedStory story={story}>
+            <TypedMessage />
+          </RepliedStory>
+        }
+
+        {type === 'story-photo-message' && // reply a story with a photo
+          <RepliedStory story={story}>
+            <TypedMessage>
+              <PhotoMessage media={media}/>
+            </TypedMessage>
+          </RepliedStory>
+        }
+
+        {type === 'story-video-message' && // reply a story with a video
+          <RepliedStory story={story}>
+            <TypedMessage>
+              <VideoMessage media={media}/>
+            </TypedMessage>
+          </RepliedStory>
+        }
+
+        {type === 'story-group-media-message' && // reply a story with group media
+          <RepliedStory story={story}>
+            <TypedMessage>
+              <GroupMediaMessage media={media}/>
+            </TypedMessage>
+          </RepliedStory>
+        }
+
+        {type === 'reply-text-message' && // reply a message with a text
+          <ReplyTypedMessage />
+        }
+
+        {type === 'reply-photo-message' && // reply a message with a photo
+          <div className='text-post-msg'
+          >
+              
+            <div>
+              <div className='replied-message' onClick={() => {
+                const element = document.querySelector(`[id='${replyMessage.id}']`)
+                element.scrollIntoView()
+              }}>
+                <ReplyMessage message={message}/>
+              </div>
+              
+              <div className="media-reply">
+                <MessageOptions message={message} dmUrl={dmUrl} 
+                  otherUser={otherUser}
+                  />
+
+                <img src={media} alt="" className='img story-reply-img' onLoad={() => {
+                  const pre = document.querySelector(`[id='${id.toString()}'] .media-reply pre`)
+                  pre.style.width = `${document.querySelector(`[id='${id.toString()}'] .media-reply img`).getBoundingClientRect().width}px`
+
+                  const div = document.querySelector(`[id='${id.toString()}'] .pic-post-body`)
+                  div.style.width = `${document.querySelector(`[id='${id.toString()}'] .media-reply img`).getBoundingClientRect().width + 10}px`
+                }}data-type='reply-photo-message' data-val={media}/>
+                
+                <MessageCaption message={message} />
+              </div>
+            </div>
+              
+            <MessageTime 
+              message={message} thisRoom={thisRoom} isLastMessage={isLastMessage}
+              otherUser={otherUser}
+            />
+          </div>
+        }
+
+        {type === 'reply-video-message' && // reply a message with a video
+          <div className='text-post-msg'
+          >
+              
+            <div>
+              <div className='replied-message' onClick={() => {
+                const element = document.querySelector(`[id='${replyMessage.id}']`)
+                element.scrollIntoView()
+              }}>
+                <ReplyMessage message={message}/>
+              </div>
+              
+              <div className="media-reply">
+                <MessageOptions message={message} dmUrl={dmUrl} 
+                  otherUser={otherUser}
+                  />
+
+                <video controls src={media} className='video' onLoadedData={() => {
+                  const pre = document.querySelector(`[id='${id.toString()}'] .media-reply pre`)
+                  pre.style.width = `${document.querySelector(`[id='${id.toString()}'] .media-reply video`).getBoundingClientRect().width}px`
+
+                  const div = document.querySelector(`[id='${id.toString()}'] .pic-post-body`)
+                  div.style.width = `${document.querySelector(`[id='${id.toString()}'] .media-reply video`).getBoundingClientRect().width + 10}px`
+                }}data-type='reply-video-message' data-val={media}></video>
+                
+                <MessageCaption message={message} />
+              </div>
+            </div>
+              
+            <MessageTime 
+              message={message} thisRoom={thisRoom} isLastMessage={isLastMessage}
+              otherUser={otherUser}
+            />
+          </div>
+        }
+
+        {type === 'reply-group-media-message' && // reply a message with group media
+          <div className='text-post-msg'
+          >
+              
+            <div>
+              <div className='replied-message group-replied-message' onClick={() => {
+                const element = document.querySelector(`[id='${replyMessage.id}']`)
+                element.scrollIntoView()
+              }}>
+                <ReplyMessage message={message}/>
+              </div>
+              
+              <div>
+                <MessageOptions message={message} dmUrl={dmUrl} 
+                  otherUser={otherUser}
+                  />
+
+                <div className={media.length > 4 ? "group-media-message-container four" : 'group-media-message-container'}>
+                  {media.length > 4 ?
+                    <>
+                      <div className='group-media-container-overlay'>
+                        +{media.length - 3}
+                      </div>
+                      {media.slice(0, 4).map((msg, index) => {
+                        return (
+                          <div key={index}>
+                            {msg.type === 'video' &&
+                              <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
+                            {msg.type === 'img' &&
+                              <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
+                          </div>
+                        )
+                      })}
+                    </>
                     :
                     <>
-                      {message?.caption}
-                    </>
-                  }
-                </>
-              }
-
-              {message.caption.length > 300 &&
-                <>
-                  {showMore &&
-                    <>
-                      {isLinkElement(message?.caption) ?
-                            
-                        <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                          {message?.caption}
-                        </a>
-                        :
-                        <>
-                          {message?.caption}
-                          <b onClick={() => setShowMore(!showMore)}>
-                            {showMore ? 'less' : 'more'}
-                          </b>
-                        </>
-                      }
-                    </>
-                  }
-
-                  {!showMore && 
-                    <>
-                    
-                    
-                      {isLinkElement(message?.caption) ?
-                            
-                        <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                          {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                          {message?.caption?.length < 300 && message?.caption}
-                        </a>
-                        :
-                        <>
-                          {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                        </>
-                      }
-                    </>
-                  }
-                </>
-              }
-              </pre>
-            </div>
-              
-            <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-              { message.time }
-            </span>
-          </div> 
-        </div>
-      }
-      
-      {type === 'video-message' &&
-        <div id={message.id} data-type='video-message' data-val={message.body} className='messages-sect-message message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'align-right' : 'align-left'} data-type='video-message' data-val={message.body}>
-
-            <div className={message.creator === userAuth ? 'img-message-body right' : 'img-message-body'}>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <video controls className='video' src={message.body} data-type='video-message' data-val={message.body} onLoadedData={() => {
-                const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-              }}
-              ></video>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-              
-            <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-              { message.time }
-            </span>
-          </div> 
-        </div>
-      }
-
-      {type === 'group-media-message' &&
-        <div id={message.id} data-type='group-media-message' data-val={JSON.stringify(message.body)} className='messages-sect-message message multi-media'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'align-right' : 'align-left'} data-type='group-media-message' data-val={JSON.stringify(message.body)}>
-
-            <div className={message.creator === userAuth ? 'img-message-body right' : 'img-message-body'}>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <div className={message.body.length > 4 ? "group-media-message-container four" : 'group-media-message-container'}>
-                {message.body.length > 4 ?
-                  <>
-                    <div className='group-media-container-overlay'>
-                      +{message.body.length - 3}
-                    </div>
-                    {message.body.slice(0, 4).map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                  :
-                  <>
-                    {message.body.map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                }
-              </div>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-              
-            <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-              { message.time }
-            </span>
-          </div> 
-        </div>
-      }
-
-      {type === 'Text-post' && 
-        <div id={message?.id} data-type='Text-post' className='text-post-msg is-text-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message?.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="text-post-overlay"></div>
-            <div className='text-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${post?.id}`} >
-                <pre>
-                  {post?.body.length >= 300 && `${post?.body.slice(0, 300)}...`} { post?.body.length >= 150 && <b> more </b>}
-                  {post?.body.length < 300 && post.body}
-                </pre>
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === post?.creator)?.username}
-                </span>
-              
-                <span>
-                  {post?.date}
-                </span>
-
-                <span>
-                  {post?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="text-post-info">
-              <div>{post?.likes?.value?.length} <span> likes </span></div>
-              <div>{post?.comments?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Picture-Media-post' && 
-        <div id={message.id} data-type='Picture-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-              
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${post?.id}`}>
-                <img src={post?.body} alt="" onLoad={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                }}/>
-                <div className="img-pre">
-                  <pre>
-                    {post?.caption?.length >= 100 && `${post?.caption.slice(0, 100)}...`} 
-                    {post?.caption?.length < 100 && post?.caption}
-                  </pre>
-                </div>
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === post?.creator)?.username}
-                </span>
-              
-                <span>
-                  {post?.date}
-                </span>
-
-                <span>
-                  {post?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{post?.likes?.value?.length} <span> likes </span></div>
-              <div>{post?.comments?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Video-Media-post' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${post?.id}`}>
-                <video controls src={post?.body} onLoadedData={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                }}
-                ></video>
-                <div className="vid-pre">
-                  <pre>
-                    {post?.caption?.length >= 100 && `${post?.caption.slice(0, 100)}...`} 
-                    {post?.caption?.length < 100 && post?.caption}
-                  </pre>
-                </div>
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === post?.creator)?.username}
-                </span>
-              
-                <span>
-                  {post?.date}
-                </span>
-
-                <span>
-                  {post?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{post?.likes?.value?.length} <span> likes </span></div>
-              <div>{post?.comments?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Group-Media-post' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}
-          >
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${post?.id}`}>
-                <span className="media-length">
-                  1/{post?.body.length}
-                </span>
-                {post?.body[0].type === 'img' ?
-                  <>
-                    <img src={post?.body[0].url} alt="" className='group-img' onLoad={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                    }}/>
-                    <div className="img-pre">
-                      <pre>
-                        {post?.caption?.length >= 100 && `${post?.caption.slice(0, 100)}...`} 
-                        {post?.caption?.length < 100 && post?.caption}
-                      </pre>
-                    </div>
-                  </>
-                  :
-                  <>
-                    <video controls src={post?.body[0].url} className='group-video' onLoadedData={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                    }}
-                    ></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {post?.caption?.length >= 100 && `${post?.caption.slice(0, 100)}...`} 
-                        {post?.caption?.length < 100 && post?.caption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === post?.creator)?.username}
-                </span>
-              
-                <span>
-                  {post?.date}
-                </span>
-
-                <span>
-                  {post?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{post?.likes?.value?.length} <span> likes </span></div>
-              <div>{post?.comments?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'story-text-message' && // reply a story with a text
-        <div id={message.id} data-type='story-text-message' className='text-post-msg story-reply message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          {console.log(message.storyUrl.slice(1, 2) === 'f')}
-          {console.log(message.storyUrl)}
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <Link
-              to={message.storyUrl.slice(1, 2) === 'f' ? `${message.storyUrl}` : `/f${message.storyUrl}`} state={{ url: location.pathname, user: currentUserPage }} onClick={() => {
-                followStory.current = message.storyCreator
-                storyType.current = message.storyCreator === userAuth ? 'user' : 'following'
-              }}
-            >
-              <div className='reply-div'>
-                {message.storyType === 'Text-Story' &&
-                  <>
-                    <div className='text-post-body'>
-                      <p className='story-reply-text'> 
-                        {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                      </p>
-                      <pre className='text-story' style={{
-                        backgroundColor: message?.storyProps?.backgroundColor,
-                        fontWeight: message?.storyProps?.fontWeight,
-                        color: message?.storyProps?.color,
-                        fontStyle: message?.storyProps?.fontStyle,
-                        fontFamily: message?.storyProps?.fontFamily
-                      }} >
-                        {message?.storyText.length >= 300 && `${message?.storyText.slice(0, 300)}...`} { message?.storyText.length >= 300 && <b> more </b>}
-                        {message?.storyText.length < 300 && message.storyText}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Img-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-                    <img src={message?.storyMedia} alt="" className='text-image-story' onLoad={() => {
-                      const pres = document.querySelectorAll(`[id='${message.id.toString()}'] pre`)
-                      pres.forEach(pre => {
-                        pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                        })
-                      }}
-                    />
-                    <div className="img-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Vid-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-
-                    <video className='text-video-story' src={message.storyMedia} onLoadedData={() => {
-                      const pres = document.querySelectorAll(`[id='${message.id.toString()}'] pre`)
-                      pres.forEach(pre => {
-                        pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                        })
-                      }}
-                    ></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </div>
-            </Link>
-              
-            <pre className='text-story text-story-text'>
-              <FaReply className='reply-arrow'/>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <>
-                {message?.body.length < 301 &&
-                  <>
-                    {isLinkElement(message?.body) ?
-                          
-                      <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                        {message?.body}
-                      </a>
-                      :
-                      <>
-                        {message?.body}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.body.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.body) ?
-                              
-                          <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                            {message?.body}
-                          </a>
-                          :
-                          <>
-                            {message?.body}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.body) ?
-                              
-                          <a className='out-link' href={message?.body.includes('http://') || message?.body.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                            {message?.body?.length >= 300 && `${message?.body.slice(0, 300)}...`} { message?.body?.length >= 300 && <b> more </b>}
-                            {message?.body?.length < 300 && message?.body}
-                          </a>
-                          :
-                          <>
-                            {message?.body.length >= 300 && `${message?.body.slice(0, 300)}...`} {message?.body.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </>
-            </pre>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'story-photo-message' && // reply a story with a photo
-        <div id={message.id} data-type='story-photo-message' data-val={message.body} className='text-post-msg story-reply message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='story-photo-message' data-val={message.body}
-          >
-            <Link
-              to={message.storyUrl.slice(1, 2) === 'f' ? `${message.storyUrl}` : `/f${message.storyUrl}`} state={{ url: location.pathname, user: currentUserPage }} onClick={() => {
-                followStory.current = message.storyCreator
-                storyType.current = message.storyCreator === userAuth ? 'user' : 'following'
-              }}
-            >
-              <div className='reply-div'>
-                {message.storyType === 'Text-Story' &&
-                  <>
-                    <div className='text-post-body'>
-                      <p className='story-reply-text'> 
-                        {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                      </p>
-                      <pre className='text-story' style={{
-                        backgroundColor: message?.storyProps?.backgroundColor,
-                        fontWeight: message?.storyProps?.fontWeight,
-                        color: message?.storyProps?.color,
-                        fontStyle: message?.storyProps?.fontStyle,
-                        fontFamily: message?.storyProps?.fontFamily
-                      }} >
-                        {message?.storyText.length >= 300 && `${message?.storyText.slice(0, 300)}...`} { message?.storyText.length >= 300 && <b> more </b>}
-                        {message?.storyText.length < 300 && message.storyText}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Img-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-                    <img src={message?.storyMedia} alt="" className='text-image-story'/>
-                    <div className="img-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Vid-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-
-                    <video className='text-video-story' src={message.storyMedia}></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </div>
-            </Link>
-
-            <div className="media-reply">
-              <FaReply className='reply-arrow' />
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <img src={message.body} alt="" className='img story-reply-img' onLoad={() => {
-                const pre = document.querySelector(`[id='${message.id.toString()}'] .media-reply pre`)
-                const myWidth = document.querySelector(`[id='${message.id.toString()}'] .media-reply img`).getBoundingClientRect().width
-                let otherWidth
-                if (message.storyType === 'Text-Story') {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-post-body`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-post-body`)
-                    body.style.width = `${myWidth}px`
-                    pre.style.width = `${myWidth}px`
-                  } else {
-                    const img = document.querySelector(`[id='${message.id.toString()}'] .media-reply img`)
-                    img.style.width = `${otherWidth - 10}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                  }
-                  
-                } else if (message.storyType === 'Img-Story') {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-image-story`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-image-story`)
-                    body.style.width = `${myWidth}px`
-                    pre.style.width = `${myWidth}px`
-                  } else {
-                    const img = document.querySelector(`[id='${message.id.toString()}'] .media-reply img`)
-                    img.style.width = `${otherWidth - 10}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                  }
-
-                  const storyPre = document.querySelector(`[id='${message.id.toString()}'] .img-pre pre`)
-                  storyPre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-image-story`).getBoundingClientRect().width}px`
-                } else if (message.storyType === 'Vid-Story')  {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-video-story`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-video-story`)
-                    body.style.width = `${myWidth}px`
-                    pre.style.width = `${myWidth}px`
-                  } else {
-                    const img = document.querySelector(`[id='${message.id.toString()}'] .media-reply img`)
-                    img.style.width = `${otherWidth - 10}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                  }
-
-                  const storyPre = document.querySelector(`[id='${message.id.toString()}'] .vid-pre pre`)
-                  storyPre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-video-story`).getBoundingClientRect().width}px`
-                }
-
-
-              }} data-type='story-photo-message' data-val={message.body}/>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'story-video-message' && // reply a story with a video
-        <div id={message.id} data-type='story-video-message' data-val={message.body} className='text-post-msg story-reply message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='story-video-message' data-val={message.body}
-          >
-            <Link
-              to={message.storyUrl.slice(1, 2) === 'f' ? `${message.storyUrl}` : `/f${message.storyUrl}`} state={{ url: location.pathname, user: currentUserPage }} onClick={() => {
-                followStory.current = message.storyCreator
-                storyType.current = message.storyCreator === userAuth ? 'user' : 'following'
-              }}
-            >
-              <div className='reply-div'>
-                {message.storyType === 'Text-Story' &&
-                  <>
-                    <div className='text-post-body'>
-                      <p className='story-reply-text'> 
-                        {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                      </p>
-                      <pre className='text-story' style={{
-                        backgroundColor: message?.storyProps?.backgroundColor,
-                        fontWeight: message?.storyProps?.fontWeight,
-                        color: message?.storyProps?.color,
-                        fontStyle: message?.storyProps?.fontStyle,
-                        fontFamily: message?.storyProps?.fontFamily
-                      }} >
-                        {message?.storyText.length >= 300 && `${message?.storyText.slice(0, 300)}...`} { message?.storyText.length >= 300 && <b> more </b>}
-                        {message?.storyText.length < 300 && message.storyText}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Img-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-                    <img src={message?.storyMedia} alt="" className='text-image-story'/>
-                    <div className="img-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Vid-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-
-                    <video className='text-video-story' src={message.storyMedia} ></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </div>
-            </Link>
-
-            <div className="media-reply">
-              <FaReply className='reply-arrow' />
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <video controls src={message.body} className='video story-reply-img' onLoadedData={() => {
-                const pre = document.querySelector(`[id='${message.id.toString()}'] .media-reply pre`)
-                const myWidth = document.querySelector(`[id='${message.id.toString()}'] .media-reply video`).getBoundingClientRect().width
-                let otherWidth
-                if (message.storyType === 'Text-Story') {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-post-body`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-post-body`)
-                    body.style.width = `${myWidth}px`
-                    // body.style.maxWidth = `${320}px`
-                    pre.style.width = `${myWidth}px`
-                    // pre.style.maxWidth = `${320}px`
-                  } else {
-                    const video = document.querySelector(`[id='${message.id.toString()}'] .media-reply video`)
-                    video.style.width = `${otherWidth - 10}px`
-                    // video.style.maxWidth = `${320}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                    // pre.style.maxWidth = `${320}px`
-                  }
-                  
-                } else if (message.storyType === 'Img-Story') {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-image-story`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-image-story`)
-                    body.style.width = `${myWidth}px`
-                    pre.style.width = `${myWidth}px`
-                  } else {
-                    const video = document.querySelector(`[id='${message.id.toString()}'] .media-reply video`)
-                    video.style.width = `${otherWidth - 10}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                  }
-
-                  const storyPre = document.querySelector(`[id='${message.id.toString()}'] .img-pre pre`)
-                  storyPre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-image-story`).getBoundingClientRect().width}px`
-                } else if (message.storyType === 'Vid-Story')  {
-                  otherWidth = document.querySelector(`[id='${message.id.toString()}'] .text-video-story`).getBoundingClientRect().width
-
-                  if (myWidth > otherWidth) {
-                    const body = document.querySelector(`[id='${message.id.toString()}'] .text-video-story`)
-                    body.style.width = `${myWidth}px`
-                    pre.style.width = `${myWidth}px`
-                  } else {
-                    const video = document.querySelector(`[id='${message.id.toString()}'] .media-reply video`)
-                    video.style.width = `${otherWidth - 10}px`
-                    pre.style.width = `${otherWidth - 10}px`
-                  }
-
-                  const storyPre = document.querySelector(`[id='${message.id.toString()}'] .vid-pre pre`)
-                  storyPre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-video-story`).getBoundingClientRect().width}px`
-                }
-              }}
-                data-type='story-video-message' data-val={message.body} ></video>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-              
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'story-group-media-message' && // reply a story with group media
-        <div id={message.id} data-type='story-group-media-message' data-val={JSON.stringify(message.body)} className='text-post-msg story-reply message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='story-group-media-message' data-val={JSON.stringify(message.body)}
-            >
-            <Link
-              to={message.storyUrl.slice(1, 2) === 'f' ? `${message.storyUrl}` : `/f${message.storyUrl}`} state={{ url: location.pathname, user: currentUserPage }} onClick={() => {
-                followStory.current = message.storyCreator
-                storyType.current = message.storyCreator === userAuth ? 'user' : 'following'
-              }}
-            >
-              <div className='reply-div'>
-                {message.storyType === 'Text-Story' &&
-                  <>
-                    <div className='text-post-body'>
-                      <p className='story-reply-text'> 
-                        {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                      </p>
-                      <pre className='text-story' style={{
-                        backgroundColor: message?.storyProps?.backgroundColor,
-                        fontWeight: message?.storyProps?.fontWeight,
-                        color: message?.storyProps?.color,
-                        fontStyle: message?.storyProps?.fontStyle,
-                        fontFamily: message?.storyProps?.fontFamily
-                      }} >
-                        {message?.storyText.length >= 300 && `${message?.storyText.slice(0, 300)}...`} { message?.storyText.length >= 300 && <b> more </b>}
-                        {message?.storyText.length < 300 && message.storyText}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Img-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-                    <img src={message?.storyMedia} alt="" className='text-image-story' onLoad={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] .img-pre pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-image-story`).getBoundingClientRect().width}px`
-                      }}
-                    />
-                    <div className="img-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-
-                {message.storyType === 'Vid-Story' &&
-                  <>
-                    <p className='story-reply-text'> 
-                      {message.creator === userAuth ? 'You replied a Story' : `${currentUserPage?.username} replied a Story`  }
-                    </p>
-
-                    <video className='text-video-story' src={message.storyMedia} onLoadedData={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] .vid-pre pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .text-video-story`).getBoundingClientRect().width}px`
-                    }}></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {message?.storyMediaCaption?.length >= 100 && `${message?.storyMediaCaption.slice(0, 100)}...`} 
-                        {message?.storyMediaCaption?.length < 100 && message?.storyMediaCaption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </div>
-            </Link>
-            
-            <div className="story-reply-img-div">
-              <FaReply className='reply-arrow' />
-
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <div className={message.body.length > 4 ? "group-media-message-container four" : 'group-media-message-container'}>
-                {message.body.length > 4 ?
-                  <>
-                    <div className='group-media-container-overlay'>
-                      +{message.body.length - 3}
-                    </div>
-                    {message.body.slice(0, 4).map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                  :
-                  <>
-                    {message.body.map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                }
-              </div>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-            
-              
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {/* use text story for stories */}
-      {type === 'reply-text-message' && // reply a message with a text
-        <div id={message.id} data-type='reply-text-message' className='text-post-msg message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            
-            <div className='replied-message' onClick={() => {
-              const element = document.querySelector(`[id='${message.replyMessage.id}']`)
-              element.scrollIntoView()
-            }}>
-              <ReplyMessage message={message}/>
-            </div>
-              
-            <div className='message-options'>
-              <FaEllipsisH />
-            </div>
-            
-            {/* className='text-story-reply' */}
-            <pre className='text-message'>
-              {message?.body.length < 301 &&
-                <>
-                  {isLinkElement(message?.body) ?
-                        
-                    <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                      {message?.body}
-                    </a>
-                    :
-                    <>
-                      {message?.body}
-                    </>
-                  }
-                </>
-              }
-
-              {message.body.length > 300 &&
-                <>
-                  {showMore &&
-                    <>
-                      {isLinkElement(message?.body) ?
-                            
-                        <a className='out-link' href={message?.body.includes('http://') || message.body?.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                          {message?.body}
-                        </a>
-                        :
-                        <>
-                          {message?.body}
-                          <b onClick={() => setShowMore(!showMore)}>
-                            {showMore ? 'less' : 'more'}
-                          </b>
-                        </>
-                      }
-                    </>
-                  }
-
-                  {!showMore && 
-                    <>
-                    
-                    
-                      {isLinkElement(message?.body) ?
-                            
-                        <a className='out-link' href={message?.body.includes('http://') || message?.body.includes('https://') ? `${message?.body}` : `http://${message?.body}`} target='_blank'>
-                          {message?.body?.length >= 300 && `${message?.body.slice(0, 300)}...`} { message?.body?.length >= 300 && <b> more </b>}
-                          {message?.body?.length < 300 && message?.body}
-                        </a>
-                        :
-                        <>
-                          {message?.body.length >= 300 && `${message?.body.slice(0, 300)}...`} {message?.body.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                        </>
-                      }
-                    </>
-                  }
-                </>
-              }
-            </pre>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'reply-photo-message' && // reply a message with a photo
-        <div id={message.id} data-type='reply-photo-message' data-val={message.body} className='text-post-msg message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='reply-photo-message' data-val={message.body}
-          >
-            <div className='replied-message' onClick={() => {
-              const element = document.querySelector(`[id='${message.replyMessage.id}']`)
-              element.scrollIntoView()
-            }}>
-              <ReplyMessage message={message}/>
-            </div>
-            
-            <div className="media-reply">
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <img src={message.body} alt="" className='img story-reply-img' onLoad={() => {
-                const pre = document.querySelector(`[id='${message.id.toString()}'] .media-reply pre`)
-                pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .media-reply img`).getBoundingClientRect().width}px`
-
-                const div = document.querySelector(`[id='${message.id.toString()}'] .pic-post-body`)
-                div.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .media-reply img`).getBoundingClientRect().width + 10}px`
-              }}data-type='reply-photo-message' data-val={message.body}/>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'reply-video-message' && // reply a message with a video
-        <div id={message.id} data-type='reply-video-message' data-val={message.body} className='text-post-msg message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='reply-video-message' data-val={message.body}
-          >
-            <div className='replied-message' onClick={() => {
-              const element = document.querySelector(`[id='${message.replyMessage.id}']`)
-              element.scrollIntoView()
-            }}>
-              <ReplyMessage message={message}/>
-            </div>
-            
-            <div className="media-reply">
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <video controls src={message.body} className='video' onLoadedData={() => {
-                const pre = document.querySelector(`[id='${message.id.toString()}'] .media-reply pre`)
-                pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .media-reply video`).getBoundingClientRect().width}px`
-
-                const div = document.querySelector(`[id='${message.id.toString()}'] .pic-post-body`)
-                div.style.width = `${document.querySelector(`[id='${message.id.toString()}'] .media-reply video`).getBoundingClientRect().width + 10}px`
-              }}data-type='reply-video-message' data-val={message.body}></video>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'reply-group-media-message' && // reply a message with group media
-        <div id={message.id} data-type='reply-group-media-message' data-val={JSON.stringify(message.body)} className='text-post-msg message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}
-        >
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'} data-type='reply-group-media-message' data-val={JSON.stringify(message.body)}
-          >
-            <div className='replied-message group-replied-message' onClick={() => {
-              const element = document.querySelector(`[id='${message.replyMessage.id}']`)
-              element.scrollIntoView()
-            }}>
-              <ReplyMessage message={message}/>
-            </div>
-            
-            <div className={message.creator === userAuth ? 'img-message-body right' : 'img-message-body'}>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <div className={message.body.length > 4 ? "group-media-message-container four" : 'group-media-message-container'}>
-                {message.body.length > 4 ?
-                  <>
-                    <div className='group-media-container-overlay'>
-                      +{message.body.length - 3}
-                    </div>
-                    {message.body.slice(0, 4).map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                  :
-                  <>
-                    {message.body.map((msg, index) => {
-                      return (
-                        <div key={index}>
-                          {msg.type === 'video' &&
-                            <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
-                          {msg.type === 'img' &&
-                            <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
-                        </div>
-                      )
-                    })}
-                  </>
-                }
-              </div>
-              <pre>
-                {message?.caption.length < 301 &&
-                  <>
-                    {isLinkElement(message?.caption) ?
-                          
-                      <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                        {message?.caption}
-                      </a>
-                      :
-                      <>
-                        {message?.caption}
-                      </>
-                    }
-                  </>
-                }
-
-                {message.caption.length > 300 &&
-                  <>
-                    {showMore &&
-                      <>
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message.caption?.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption}
-                            <b onClick={() => setShowMore(!showMore)}>
-                              {showMore ? 'less' : 'more'}
-                            </b>
-                          </>
-                        }
-                      </>
-                    }
-
-                    {!showMore && 
-                      <>
-                      
-                      
-                        {isLinkElement(message?.caption) ?
-                              
-                          <a className='out-link' href={message?.caption.includes('http://') || message?.caption.includes('https://') ? `${message?.caption}` : `http://${message?.caption}`} target='_blank'>
-                            {message?.caption?.length >= 300 && `${message?.caption.slice(0, 300)}...`} { message?.caption?.length >= 300 && <b> more </b>}
-                            {message?.caption?.length < 300 && message?.caption}
-                          </a>
-                          :
-                          <>
-                            {message?.caption.length >= 300 && `${message?.caption.slice(0, 300)}...`} {message?.caption.length >= 300 && <b onClick={() => setShowMore(!showMore)}> {showMore ? 'less' : 'more'} </b>}
-                          </>
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </pre>
-            </div>
-          </div>
-            
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'sent-story' && //sent-stories
-        <div id={message.id} data-type={`${message.storyType}`} className='text-post-msg is-story story-reply message' onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-            
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-          <div>
-            <div onClick={() => {
-              followStory.current = message.storyCreator
-              storyType.current = message.storyCreator === userAuth ? 'user' : 'following'
-            }}>
-              <div className='pic-post-body'>
-                <div className='message-options'>
-                  <FaEllipsisH />
-                </div>
-                  <Link to={`/f${message.storyUrl}`} state={{url: location.pathname, user: currentUserPage}}>
-                    {message.storyType === 'Text-Story' &&
-                      <>
-                        <div className='text-post-body'>
-                          <p className='story-reply-text'> 
-                            {message.creator === userAuth ? 'You sent a story' : `${currentUserPage?.username} sent a story`  }
-                          </p>
-                          <pre className='text-story' style={{
-                            backgroundColor: message?.storyProps?.backgroundColor,
-                            fontWeight: message?.storyProps?.fontWeight,
-                            color: message?.storyProps?.color,
-                            fontStyle: message?.storyProps?.fontStyle,
-                            fontFamily: message?.storyProps?.fontFamily
-                          }} >
-                            {message?.storyText.length >= 300 && `${message?.storyText.slice(0, 300)}...`} 
-                            {message?.storyText.length < 300 && message.storyText}
-                          </pre>
-                        </div>
-                      </>
-                    }
-
-                    {message.storyType === 'Img-Story' &&
-                      <>
-                        <p className='story-reply-text'> 
-                          {message.creator === userAuth ? 'You sent a story' : `${currentUserPage?.username} sent a story`  }
-                        </p>
-                        <div className='media-post-body'>
-                          <img src={message?.storyMedia} alt="" onLoad={() => {
-                            const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                            pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                          }}/>
-                          <div className="media-story-caption">
-                            <pre> 
-                              {message?.storyMediaCaption?.length >= 50 && `${message?.storyMediaCaption.slice(0, 50)}...`} 
-                              {message?.storyMediaCaption?.length < 50 && message?.storyMediaCaption}
-                            </pre>
-                            <p>
-                              {/* {message?.time} */}
-                            </p>
+                      {media.map((msg, index) => {
+                        return (
+                          <div key={index}>
+                            {msg.type === 'video' &&
+                              <video controls src={msg.url} data-type='group-media-message' data-val={JSON.stringify(message.body)}></video>}
+                            {msg.type === 'img' &&
+                              <img src={msg.url} alt="" data-type='group-media-message' data-val={JSON.stringify(message.body)} />}
                           </div>
-                        </div>
-                      </>
-                    }
-
-                    {message.storyType === 'Vid-Story' &&
-                      <>
-                        <p className='story-reply-text'> 
-                          {message.creator === userAuth ? 'You sent a story' : `${currentUserPage?.username} sent a story`  }
-                        </p>
-                        <div className="media-post-body">
-                          <video controls src={message.storyMedia} onLoadedData={() => {
-                            const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                            pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                          }}
-                          ></video>
-                          <div className="media-story-caption">
-                            <pre> 
-                              {message?.storyMediaCaption?.length >= 50 && `${message?.storyMediaCaption.slice(0, 50)}...`} 
-                              {message?.storyMediaCaption?.length < 50 && message?.storyMediaCaption}
-                            </pre>
-                            <p>
-                              {/* {message?.time} */}
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    }
-                  </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-          
-        <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-          { message.time }
-        </span>
-      </div>
-      }
-
-      {type === 'Text-Comment-comment' && 
-        <div id={message?.id} data-type='Text-post' className='text-post-msg is-text-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message?.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="text-post-overlay"></div>
-            <div className='text-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${comment?.id}`}>
-                <pre>
-                  {comment?.body.length >= 300 && `${comment?.body.slice(0, 300)}...`} { comment?.body.length >= 150 && <b> more </b>}
-                  {comment?.body.length < 300 && comment.body}
-                </pre>
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === comment?.creator)?.username}
-                </span>
-              
-                <span>
-                  {comment?.date}
-                </span>
-
-                <span>
-                  {comment?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="text-post-info">
-              <div>{comment?.likes?.value?.length} <span> likes </span></div>
-              <div>{comment?.replies?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Photo-Comment-comment' && 
-        <div id={message.id} data-type='Picture-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-              
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${comment?.id}`}>
-                <img src={comment?.body} alt="" onLoad={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                }}/>
-                <div className="img-pre">
-                  <pre>
-                    {comment?.caption?.length >= 100 && `${comment?.caption.slice(0, 100)}...`} 
-                    {comment?.caption?.length < 100 && comment?.caption}
-                  </pre>
+                        )
+                      })}
+                    </>
+                  }
                 </div>
-              </Link>
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === comment?.creator)?.username}
-                </span>
-              
-                <span>
-                  {comment?.date}
-                </span>
-
-                <span>
-                  {comment?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{comment?.likes?.value?.length} <span> likes </span></div>
-              <div>{comment?.replies?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Video-Comment-comment' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
+                
+                <MessageCaption message={message} />
               </div>
-              <Link to={`/post/${message.postId}/comments/${comment?.id}`}>
-                <video controls src={comment?.body} onLoadedData={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                }}>
-                </video>
-                <div className="vid-pre">
-                  <pre>
-                    {comment?.caption?.length >= 100 && `${comment?.caption.slice(0, 100)}...`} 
-                    {comment?.caption?.length < 100 && comment?.caption}
-                  </pre>
-                </div>
-              </Link>
             </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === comment?.creator)?.username}
-                </span>
               
-                <span>
-                  {comment?.date}
-                </span>
-
-                <span>
-                  {comment?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{comment?.likes?.value?.length} <span> likes </span></div>
-              <div>{comment?.replies?.value?.length} <span> comments </span> </div>
-            </div>
+            <MessageTime 
+              message={message} thisRoom={thisRoom} isLastMessage={isLastMessage}
+              otherUser={otherUser}
+            />
           </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
+        }
 
-      {type === 'Group-Comment-comment' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${comment?.id}`}>
-                <span className="media-length">
-                  1/{comment?.body.length}
-                </span>
-                {comment?.body[0].type === 'img' ?
-                  <>
-                    <img src={comment?.body[0].url} alt="" className='group-img' onLoad={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                    }}/>
-                    <div className="img-pre">
-                      <pre>
-                        {comment?.caption?.length >= 100 && `${comment?.caption.slice(0, 100)}...`} 
-                        {comment?.caption?.length < 100 && comment?.caption}
-                      </pre>
-                    </div>
-                  </>
-                  :
-                  <>
-                    <video controls src={comment?.body[0].url} className='group-video' onLoadedData={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                    }}>
-                    </video>
-                    <div className="vid-pre">
-                      <pre>
-                        {comment?.caption?.length >= 100 && `${comment?.caption.slice(0, 100)}...`} 
-                        {comment?.caption?.length < 100 && comment?.caption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </Link>
-              
-            </div>
 
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === comment?.creator)?.username}
-                </span>
-              
-                <span>
-                  {comment?.date}
-                </span>
-
-                <span>
-                  {comment?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{comment?.likes?.value?.length} <span> likes </span></div>
-              <div>{comment?.replies?.value?.length} <span> comments </span> </div>
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Text-Reply-reply' && 
-        <div id={message?.id} data-type='Text-post' className='text-post-msg is-text-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-           
-          <div className={message?.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="text-post-overlay"></div>
-            <div className='text-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${message.commentId}/replies/${reply?.id}`}>
-                <pre>
-                  {reply?.body.length >= 300 && `${reply?.body.slice(0, 300)}...`} { reply?.body.length >= 150 && <b> more </b>}
-                  {reply?.body.length < 300 && reply.body}
-                </pre>
-              </Link>
-              
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === reply?.creator)?.username}
-                </span>
-              
-                <span>
-                  {reply?.date}
-                </span>
-
-                <span>
-                  {reply?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="text-post-info">
-              <div>{reply?.likes?.value?.length} <span> likes </span></div>
-              {/* <div>{reply?.comments?.value?.length} <span> comments </span> </div> */}
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Photo-Reply-reply' && 
-        <div id={message.id} data-type='Picture-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-              
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${message.commentId}/replies/${reply?.id}`}>
-                <img src={reply?.body} alt="" onLoad={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width}px`
-                }}/>
-                <div className="img-pre">
-                  <pre>
-                    {reply?.caption?.length >= 100 && `${reply?.caption.slice(0, 100)}...`} 
-                    {reply?.caption?.length < 100 && reply?.caption}
-                  </pre>
-                </div>
-              </Link>
-              
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === reply?.creator)?.username}
-                </span>
-              
-                <span>
-                  {reply?.date}
-                </span>
-
-                <span>
-                  {reply?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{reply?.likes?.value?.length} <span> likes </span></div>
-              {/* <div>{reply?.comments?.value?.length} <span> comments </span> </div> */}
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time'} >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Video-Reply-reply' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-          
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${message.commentId}/replies/${reply?.id}`}>
-                <video controls src={reply?.body} onLoadedData={() => {
-                  const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                  pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                }}></video>
-                <div className="vid-pre">
-                  <pre>
-                    {reply?.caption?.length >= 100 && `${reply?.caption.slice(0, 100)}...`} 
-                    {reply?.caption?.length < 100 && reply?.caption}
-                  </pre>
-                </div>
-              </Link>
-
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === reply?.creator)?.username}
-                </span>
-              
-                <span>
-                  {reply?.date}
-                </span>
-
-                <span>
-                  {reply?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{reply?.likes?.value?.length} <span> likes </span></div>
-              {/* <div>{reply?.comments?.value?.length} <span> comments </span> </div> */}
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {type === 'Group-Reply-reply' && 
-        <div id={message.id} data-type='Video-Media-post' className='text-post-msg is-post message'
-        onMouseEnter={e => mouseenter(e)} onMouseLeave={e => mouseleave(e)}>
-           
-          <div className={message.creator === userAuth ? 'tp-div align-right' : 'align-left tp-div'}>
-            <div className="media-post-overlay"></div>
-            <div className='media-post-body'>
-              <div className='message-options'>
-                <FaEllipsisH />
-              </div>
-              <Link to={`/post/${message.postId}/comments/${message.commentId}/replies/${reply?.id}`}>
-                <span className="media-length">
-                  1/{reply?.body.length}
-                </span>
-                {reply?.body[0].type === 'img' ?
-                  <>
-                    <img src={reply?.body[0].url} alt="" className='group-img' onLoad={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] img`).getBoundingClientRect().width - 0.5}px`
-                    }}/>
-                    <div className="img-pre">
-                      <pre>
-                        {reply?.caption?.length >= 100 && `${reply?.caption.slice(0, 100)}...`} 
-                        {reply?.caption?.length < 100 && reply?.caption}
-                      </pre>
-                    </div>
-                  </>
-                  :
-                  <>
-                    <video controls src={reply?.body[0].url} className='group-video' onLoadedData={() => {
-                      const pre = document.querySelector(`[id='${message.id.toString()}'] pre`)
-                      pre.style.width = `${document.querySelector(`[id='${message.id.toString()}'] video`).getBoundingClientRect().width}px`
-                    }}
-                    ></video>
-                    <div className="vid-pre">
-                      <pre>
-                        {reply?.caption?.length >= 100 && `${reply?.caption.slice(0, 100)}...`} 
-                        {reply?.caption?.length < 100 && reply?.caption}
-                      </pre>
-                    </div>
-                  </>
-                }
-              </Link>
-              
-            </div>
-
-            <div className="text-post-creator">
-              <p>
-                <span>
-                  Post by {users.find(user => user.id === reply?.creator)?.username}
-                </span>
-              
-                <span>
-                  {reply?.date}
-                </span>
-
-                <span>
-                  {reply?.time}
-                </span>
-              </p>
-            </div>
-
-            <div className="media-post-info">
-              <div>{reply?.likes?.value?.length} <span> likes </span></div>
-              {/* <div>{reply?.comments?.value?.length} <span> comments </span> </div> */}
-            </div>
-          </div>
-          <span className={message.creator === userAuth ? 'align-span message-time' : 'message-time' } >
-            { message.time }
-          </span>
-        </div>
-      }
-
-      {/* sending group media ==> posts & other media ==> comments/replies       */}
-      {/* replying messages with group media */}
-    </>
+        {type.includes("Story") &&
+          <RepliedStory story={post} sent={true} />
+        }
+      </motion.div>
+    </messageContext.Provider>
   )
 }
 
@@ -2433,3 +493,599 @@ export default Message
 
 
 
+
+
+
+
+
+const MessageCaption = ({ classname, children }) => {
+  const { hrefChecker, isLinkElement } = useContext(functionsContext)
+  
+  const { message } = useContext(messageContext)
+
+  const { id, caption } = message
+
+  const [captionToShow, setCaptionToShow] = useState('')
+  const [showMore, setShowMore] = useState(false)
+
+  useEffect(() => {
+    if (caption.length >= 300) {
+      if (showMore) {
+        setCaptionToShow(caption)
+
+      } else {
+        setCaptionToShow(`${caption.slice(0, 300)}...`)
+      }
+
+    } else {
+      setCaptionToShow(caption)
+    }
+  }, [caption, showMore])
+
+
+  return (
+    <>
+      {caption !== '' &&
+        <pre className={`slideForReply message-body ${classname}`}>
+          {children}
+          <>
+            {isLinkElement(caption) ?
+                  
+              <a className='out-link' href={hrefChecker(caption)} target='_blank'>
+                {captionToShow}
+              </a>
+              :
+              <>
+                {captionToShow}
+              </>
+            }
+            {caption.length >= 300 &&
+              <b onClick={() => setShowMore(!showMore)}>
+                {showMore ? 'less' : 'more'}
+              </b>
+            }
+          </>
+        </pre>
+      }
+    </>
+  )
+}
+
+
+
+
+
+const MessageTime = () => {
+  const { message, isLastMessage, thisRoom, otherUser, isUserCreator } = useContext(messageContext)
+
+  const { time, createdAt } = message
+
+  const [otherUserActiveObject, setOtherUserActiveObject] = useState()
+  const [messageHasBeenSeen, setMessageHasBeenSeen] = useState(false)
+
+
+  useEffect(() => {
+    if (thisRoom && otherUser) {
+      // setUserActiveObject(thisRoom.users[user.username])
+      setOtherUserActiveObject(thisRoom.users[otherUser.username])
+    }
+  }, [thisRoom, otherUser])
+
+
+
+  useEffect(() => {
+    if (otherUserActiveObject && message) {
+      const { isActive, lastActive } = otherUserActiveObject
+
+      if (isActive) {
+        setMessageHasBeenSeen(true)
+
+      } else {
+        if (isLastMessage) {
+          if (createdAt && lastActive) {
+            const messageTime = parseFloat(`${createdAt.seconds}.${createdAt.nanoseconds}`)
+            const userTime = parseFloat(`${lastActive.seconds}.${lastActive.nanoseconds}`)
+      
+            if (messageTime > userTime) {
+              setMessageHasBeenSeen(false)
+      
+            } else {
+              setMessageHasBeenSeen(true)
+            }
+          }
+        }
+      }
+      
+    }
+  }, [message, otherUserActiveObject])
+  
+  return (
+    <span className='message-time'>
+      {/* {isUserCreator && isLastMessage &&
+        <span>
+          {messageHasBeenSeen ? "Seen" : "Sent"}
+        </span>
+      } */}
+
+      <span>
+        {time}
+      </span>
+    </span>
+  )
+}
+
+
+
+
+const MessageOptions = () => {
+  const { user } = useContext(appContext)
+  const { deleteMessage } = useContext(functionsContext)
+  const { setIsReply, replyMessage } = useContext(messagingContext)
+  const { message, isUserCreator, otherUser, dmUrl, isElementTouchingRegion, hideOptionsSpan } = useContext(messageContext)
+
+  const { id, date, time, caption, creator } = message
+
+
+  function hideOptions() {
+    const messageId = `[id='${id.toString()}']`; 
+    const messageOptions = document.querySelector(`${messageId} .message-options`)
+    const optionsSpan = document.querySelector(`${messageId} .options-span`)
+
+    messageOptions?.classList.remove('active')
+    optionsSpan?.classList.remove('active')
+  }
+
+
+  useEffect(() => {
+    const messagingSection = document.querySelector('.messaging-section')
+    const messages = document.querySelectorAll('.message')
+    const region = document.querySelector('.messaging-area')
+    const spans = document.querySelectorAll('.options-span')
+    const buttons = document.querySelectorAll('.message-options button')
+
+    const showOptions = (e) => {
+      const thisSpan = e.currentTarget
+
+      hideOptions()
+
+      setTimeout(() => {
+        const optionDiv = thisSpan.nextElementSibling
+        if (optionDiv) {
+          const isTouching = isElementTouchingRegion(optionDiv, region)
+
+          optionDiv.classList.add('active')
+    
+          
+          if (isTouching.touchingTop) {
+            optionDiv.style.transform = `translateY(10%)`
+    
+          } else if (isTouching.touchingBottom) {
+            optionDiv.style.top = `unset`
+            optionDiv.style.bottom = `0.5rem`
+          }
+          
+    
+          if (isTouching.touchingLeft) {
+            optionDiv.style.transform = `translateX(50%)`
+    
+          } else if (isTouching.touchingRight) {
+            optionDiv.style.transform = `translateX(-50%)`
+          }
+        }
+      }, 50)
+    }
+
+    
+    spans.forEach(span => {
+      if (span) {
+        span.addEventListener('click', showOptions)
+      }
+    })
+
+
+
+    buttons.forEach(button => {
+      button.addEventListener('click', hideOptions)
+    })
+    
+
+    function scroll() {
+      messages.forEach(message => {
+        if (message) {
+          const optionsDiv = message.querySelector('.message-options')
+
+          if (optionsDiv) {
+            optionsDiv.classList.remove('active')
+          }
+        }
+      })
+    }
+
+    function windowClick(e) {
+      spans.forEach(span => {
+        if (span) {
+          let isActive = false
+
+          span.classList.contains('active-option') ?
+            isActive = true : isActive = false
+
+          if (isActive) {
+            span.classList.remove('active-option')
+          } 
+          return
+        }
+      })
+    }
+
+    messagingSection.addEventListener('scroll', scroll)
+    // window.addEventListener('click', windowClick)
+
+
+    return () => {
+      spans.forEach(span => {
+        if (span) {
+          span.removeEventListener('click', showOptions)
+        }
+      })
+
+      // buttons.forEach(button => {
+      //   if (message) {
+        
+      // })
+
+
+      // window.removeEventListener('click', windowClick)
+      messagingSection.removeEventListener('scroll', scroll)
+    }
+  }, [message])
+
+
+  
+
+  
+  return (
+    <>
+      <span className='options-span'>
+        <MoreHorizOutlinedIcon />
+      </span>
+      
+      <div className="message-options">
+        <div className="message-options-header">
+          <span>
+            {date}
+          </span>
+
+          <span>
+            {time}
+          </span>
+        </div>
+
+        {/* <button
+          onClick={() => {
+            replyMessage.current = message
+            setIsReply(true)
+          }}
+        >
+          <span>
+            reply
+          </span>
+
+          <ReplyIcon />
+        </button> */}
+
+        <button
+          onClick={() => copyText(caption)}
+        >
+          <span>
+            copy
+          </span>
+
+          <ContentCopyOutlinedIcon />
+        </button>
+
+        <button className='delete'
+          onClick={e => {
+            deleteMessage(dmUrl, id, isUserCreator, user, otherUser)
+          }}
+        >
+          <span>
+            delete {creator !== user.id && "for me"}
+          </span>
+
+          <DeleteOutlineOutlinedIcon />
+        </button>
+
+        <div className="message-options-footer" role={'button'}
+          onClick={() => hideOptions()}
+        >
+          <span>
+            cancel
+          </span>
+        </div>
+      </div>
+    </>
+  )
+}
+
+
+
+
+const TypedMessage = ({ children }) => {
+  return (
+    <>
+      <MessageOptions />
+
+      <div className='img-message-body'>
+        {children}
+      
+        <MessageCaption />
+      </div>
+        
+      <MessageTime />
+    </>
+  )
+}
+
+
+
+const ReplyTypedMessage = () => {
+  const { message } = useContext(messageContext)
+
+  return (
+    <div className="reply-message">
+      <ReplyMessageAttachment message={message} />
+
+      <TypedMessage />
+    </div>
+  )
+}
+
+
+
+
+const PhotoMessage = ({ media }) => {
+  const { checkResize, resizeMediaRef, resizePre, message } = useContext(messageContext)
+  const { id } = message
+  
+  
+  return (
+    <img ref={resizeMediaRef} className='img slideForReply' src={media}
+      onLoad={e => {
+        checkResize(e)
+        resizePre(e)
+      }}
+    />
+  )
+}
+
+
+
+
+const VideoMessage = ({ media }) => {
+  const { checkResize, resizeMediaRef, resizePre, message } = useContext(messageContext)
+  const { id } = message
+
+  return (
+    <Video haveControls={true} source={media} classname='video slideForReply'
+      onLoadedData={resizePre} videoRef={resizeMediaRef} 
+    />
+  )
+}
+
+
+
+const GroupMediaMessage = ({ media }) => {
+  const { message } = useContext(messageContext)
+
+  const { id } = message
+  
+  
+  return (
+    <div 
+      className={
+        `group-media-message-container slideForReply ${media.length >= 3 ? 'complete' : ''}`
+      }
+    >
+      {media.length > 4 &&
+        <div className='group-media-container-overlay'>
+          + {media.length - 3}
+        </div>
+      }
+
+      {media.slice(0, 4).map((msg, ind) => {
+        const { url, type } = msg
+        
+        return (
+          <div key={ind} className="group-media-ind-div">
+            {type === 'video' &&
+               <Video haveControls={true} source={url} 
+             />
+            }
+
+            {type === 'img' &&
+              <img src={url} alt="" />
+            }
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+
+
+
+const PostMessage = ({ children, num, bgc }) => {
+  const { post, message } = useContext(messageContext)
+
+  const { id, type } = message
+
+  const { id: postId } = post
+  
+
+  return (
+    <>
+      <div className="post-message slideForReply">
+        <MessageOptions />
+
+        <Link to={`/posts/${postId}`}
+          className='post-message-body'
+          style={{ backgroundColor: !bgc ? 'transparent' : null }}
+        >
+          {children}
+
+          <pre>
+            <ChopText text={post.caption} num={num ? num : 100} />
+          </pre>
+        </Link>
+
+        <PostMessageInfo />
+      </div>
+      
+      <MessageTime />
+    </>
+  )
+}
+
+
+
+
+const PostMessageInfo = () => {
+  const { post, message } = useContext(messageContext)
+
+  const { postCreator } = message
+
+  return (
+    <div className="post-message-creator">
+      <strong>
+        Post by {postCreator.username}
+      </strong>
+
+      <div className="post-message-overlay">
+        <span>
+          {post.likes.value.length}
+        </span>
+        <span>
+        {post.likes.value.length === 1 ? "Like" : "Likes"}
+        </span>
+      </div>
+    
+      <span>
+        {post.date}
+      </span>
+
+      <span>
+        {post.time}
+      </span>
+    </div>
+  )
+}
+
+
+
+
+const RepliedStory = ({ children, story, sent }) => {
+  const { users, user } = useContext(appContext)
+
+  const { id: storyId, caption, type, creator, media, props } = story
+
+  const storyUser = users.find(person => person.id === creator)
+
+  const location = useLocation()
+
+  if (storyUser) {
+    const { username } = storyUser
+    
+    const storyCreator = creator === user?.id ? "user" : 'following'
+  
+    const storyLink = `/stories/${username}/${storyId}?storyBy=${storyCreator}`
+
+
+
+
+    return (
+      <div className='story-message'>
+        <Link
+          className={`replied-story-body ${sent ? 'sent slideForReply' : ''}`}
+          to={storyLink} 
+          state={{ from: location.pathname }}
+          style={{
+            backgroundColor: props.backgroundColor ? props.backgroundColor : 'gray',
+          }}
+        >
+            
+          {type === 'Text-Story' &&
+            <RepliedStoryDetails storyCaption={caption} story={story} />
+          }
+
+
+          {type === 'Img-Story' &&
+            <RepliedStoryDetails storyCaption={caption} story={story}>
+              <img src={media} alt="" className='text-image-story'/>
+            </RepliedStoryDetails>
+          }
+
+
+          {type === 'Vid-Story' &&
+            <RepliedStoryDetails storyCaption={caption} story={story}>
+              <Video source={media} classname='text-video-story' />
+            </RepliedStoryDetails>
+          }
+        </Link>
+          
+        {children}
+            
+        <MessageTime />
+
+        {sent && <MessageOptions />}
+      </div>
+    )
+  }
+}
+
+
+
+
+const RepliedStoryDetails = ({ children, storyCaption, story }) => {
+  const { message, isUserCreator, otherUser } = useContext(messageContext)
+
+  const { story: storyInMessage } = message
+  
+
+  const { props } = story
+
+  return (
+    <>
+      <p className='story-detail'> 
+        {storyInMessage ?
+          <>
+            {isUserCreator ?
+              `You replied ${otherUser.displayName}'s story` :
+              `${otherUser.displayName} replied your story`
+            }
+          </>
+          :
+          <>
+            {isUserCreator ?
+              `You sent ${otherUser.displayName} a story` :
+              `${otherUser.displayName} sent you a story`
+            }
+          </>
+        }
+      </p>
+
+      {children}
+
+      <pre
+        style={{
+          fontWeight: props.fontWeight,
+          color: props.color,
+          fontStyle: props.fontStyle,
+          fontFamily: props.fontFamily
+        }}
+      >
+        {storyCaption}
+      </pre>
+    </>
+  )
+}

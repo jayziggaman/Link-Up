@@ -1,21 +1,32 @@
-import React, { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
-import verifiedBadge from '../Images/verified-badge.jpg'
-import { appContext } from '../App'
+import React from 'react'
+import UserPfp from './GENERAL-COMPONENTS/UserPfp'
+import VerifiedBadge from './GENERAL-COMPONENTS/VerifiedBadge'
 
-const SearchResult = ({ result }) => {
+const SearchResult = ({ result, suggested }) => {
 
-  return (
-    <Link to={result?.id} className="search-result">
-      <div className="search-result-img-div">
-        <img src={result?.avatarUrl} alt="" />
-      </div>
-      <div className="search-result-username">
-        <p>{result?.username} {result.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />} . {result?.followers.value?.length} {result?.followers.value?.length === 1 ? 'Follower' : 'Followers' }</p>
-        <p> {result?.displayName} </p>
-      </div>
-    </Link>
-  )
+  if (result) {
+    const { username, displayName, userType, followers } = result
+    
+    return (
+      <a href={username} className="search-result">
+        <div className="search-result-img-div">
+          <UserPfp user={result} />
+        </div>
+
+        <div className="search-result-username">
+          <p>
+            {displayName} {userType === 'creator' && <VerifiedBadge />} 
+            {!suggested &&
+              <>
+                . {followers.value?.length} {followers.value?.length === 1 ? 'Follower' : 'Followers'}
+              </>
+            }
+          </p>
+          <p> @{username} </p>
+        </div>
+      </a>
+    )
+  }
 }
 
 export default SearchResult

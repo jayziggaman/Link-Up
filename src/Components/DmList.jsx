@@ -17,8 +17,8 @@ const DmList = ({ selected, setSelected, showUserList, setShowUserList }) => {
   }, [showUserList])
 
   useEffect(() => {
-    const mainUsers = users.filter(user => user.id !== userAuth)
-    setSearchedUsers(mainUsers.filter(user => user.username.includes(search)))
+    const mainUsers = users?.filter(user => user.id !== userAuth)
+    mainUsers && setSearchedUsers(mainUsers.filter(user => user.username.trim().toLowerCase().includes(search.trim().toLowerCase())))
   }, [search, users])
 
   const handleSelected = (user) => {
@@ -44,7 +44,10 @@ const DmList = ({ selected, setSelected, showUserList, setShowUserList }) => {
     <article ref={userList} className="new-dm-users-list">
       <div className="new-dm-users-list-container">
         <section className="input-cancel-btn">
-          <button className='red' onClick={() => setShowUserList(false)}> cancel </button>
+          <button className='red' onClick={() => {
+            setShowUserList(false)
+            setSelected([])
+          }}> cancel </button>
           <input type="text" placeholder='Search users' value={search} onChange={e => setSearch(e.target.value)}/>
           <button onClick={showMessageForm} disabled={selected.length < 1 && true} style={{ opacity: selected.length < 1 && '0.4' }}>
             continue
@@ -56,7 +59,11 @@ const DmList = ({ selected, setSelected, showUserList, setShowUserList }) => {
             {selected.map(select => {
               return (
                 <div key={select.id} className='new-dm-selected-users-div'>
-                  <img src={select.avatarUrl} alt="" />
+                  {select?.avatarUrl === '' ?
+                    <span className="empty-dm-list-pfp"></span>
+                    :
+                    <img src={select?.avatarUrl} alt="" />
+                  }
 
                   <div onClick={() => removeSelected(select.id) }>
                     <div className="remove-select"></div>
@@ -74,7 +81,11 @@ const DmList = ({ selected, setSelected, showUserList, setShowUserList }) => {
               return (
                 <div key={user.id} onClick={() => handleSelected(user)} className="search-result">
                   <div className="search-result-img-div">
-                    <img src={user?.avatarUrl} alt="" />
+                    {user?.avatarUrl === '' ?
+                      <div className="empty-comment-pfp"></div>
+                      :
+                      <img src={user?.avatarUrl} alt="" />
+                    }
                   </div>
                   <div className="search-result-username">
                     <p>{user?.username} {user.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />} . {user?.followers.value?.length} {user?.followers.value?.length === 1 ? 'Follower' : 'Followers' }</p>
@@ -84,11 +95,15 @@ const DmList = ({ selected, setSelected, showUserList, setShowUserList }) => {
               )
             }) 
             :
-            users.filter(user => user.id !== userAuth).map(user => {
+            users?.filter(user => user.id !== userAuth).map(user => {
               return (
                 <div key={user.id} onClick={() => handleSelected(user)} className="search-result">
                   <div className="search-result-img-div">
-                    <img src={user?.avatarUrl} alt="" />
+                    {user?.avatarUrl === '' ?
+                      <div className="empty-comment-pfp"></div>
+                      :
+                      <img src={user?.avatarUrl} alt="" />
+                    }
                   </div>
                   <div className="search-result-username">
                     <p>{user?.username} {user.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />} . {user?.followers.value?.length} {user?.followers.value?.length === 1 ? 'Follower' : 'Followers' }</p>

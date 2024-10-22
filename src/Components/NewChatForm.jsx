@@ -4,7 +4,7 @@ import { FaPaperPlane, FaImage, FaAngleLeft, FaAngleRight } from 'react-icons/fa
 import loadVideoDark from '../Images/load-video-dark.mp4'
 import loadVideoLight from '../Images/load-video-light.mp4'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { db, directMessagesRef, postsRef, storage } from '../firebase/config'
+import { db, messageRoomsRef, postsRef, storage } from '../firebase/config'
 import {v4 as uuidv4} from 'uuid';
 import { addDoc, collection, doc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 
@@ -135,7 +135,7 @@ const NewChatForm = ({selected, setSelected}) => {
   
   const finish = (inboxId, paraCondition, type, select) => {
     if (paraCondition === 1) {
-      const meRef = doc(db, 'users', userAuth, 'directMessages', `${inboxId}a`)
+      const meRef = doc(db, 'users', userAuth, 'messageRooms', `${inboxId}a`)
       updateDoc(meRef, {
         mostRecentMessage: newText,
         mostRecentMessageTime: `${hours}:${mins} ${period}`,
@@ -143,7 +143,7 @@ const NewChatForm = ({selected, setSelected}) => {
         createdAt: time.getTime(),
         mostRecentMessageType: type ,
       }).then(() => {
-        const otherRef = doc(db, 'users', select.id, 'directMessages', `${inboxId}b`)
+        const otherRef = doc(db, 'users', select.id, 'messageRooms', `${inboxId}b`)
 
         updateDoc(otherRef, {
           mostRecentMessage: newText,
@@ -159,7 +159,7 @@ const NewChatForm = ({selected, setSelected}) => {
         setFileLength(prev => prev - prev)
       })
     } else {
-      const meRef = doc(db, 'users', userAuth, 'directMessages', `${inboxId}b`)
+      const meRef = doc(db, 'users', userAuth, 'messageRooms', `${inboxId}b`)
       updateDoc(meRef, {
         mostRecentMessage: newText,
         mostRecentMessageTime: `${hours}:${mins} ${period}`,
@@ -167,7 +167,7 @@ const NewChatForm = ({selected, setSelected}) => {
         createdAt: time.getTime(),
         mostRecentMessageType: type,
       }).then(() => {
-        const otherRef = doc(db, 'users', select.id, 'directMessages', `${inboxId}a`)
+        const otherRef = doc(db, 'users', select.id, 'messageRooms', `${inboxId}a`)
 
         updateDoc(otherRef, {
           mostRecentMessage: newText,
@@ -190,7 +190,7 @@ const NewChatForm = ({selected, setSelected}) => {
     const paraCondition = selectedUser.dmId.localeCompare(user.dmId)
 
     try {
-      const docRefA = doc(db, 'directMessages', `${para}a`)
+      const docRefA = doc(db, 'messageRooms', `${para}a`)
       onSnapshot(docRefA, doc => {
         const { chatDateMarker } = doc.data()
         let condition
@@ -207,7 +207,7 @@ const NewChatForm = ({selected, setSelected}) => {
       })
 
 
-      const docRefB = doc(db, 'directMessages', `${para}b`)
+      const docRefB = doc(db, 'messageRooms', `${para}b`)
       onSnapshot(docRefB, doc => {
         const { chatDateMarker } = doc.data()
         let condition
@@ -225,7 +225,7 @@ const NewChatForm = ({selected, setSelected}) => {
     } finally {
       if (files[0] === undefined) {
         if (newText !== '') {
-          const ref = collection(db, 'directMessages', `${para}a`, 'messages')
+          const ref = collection(db, 'messageRooms', `${para}a`, 'messages')
           setDoc(doc(ref, id), {
             id: id,
             body: newText,
@@ -237,7 +237,7 @@ const NewChatForm = ({selected, setSelected}) => {
             isSent: false
     
           }).then(() => {
-            const ref = collection(db, 'directMessages', `${para}b`, 'messages')
+            const ref = collection(db, 'messageRooms', `${para}b`, 'messages')
             setDoc(doc(ref, id), {
               id: id,
               body: newText,
@@ -263,7 +263,7 @@ const NewChatForm = ({selected, setSelected}) => {
             getDownloadURL(avatarRef).then(url => {
               mediaUrl = url
             }).then(() => {
-              const ref = collection(db, 'directMessages', `${para}a`, 'messages')
+              const ref = collection(db, 'messageRooms', `${para}a`, 'messages')
               setDoc(doc(ref, id), {
                 id: id,
                 caption: mediaCaption,
@@ -276,7 +276,7 @@ const NewChatForm = ({selected, setSelected}) => {
                 isSent: false
         
               }).then(() => {
-                const ref = collection(db, 'directMessages', `${para}b`, 'messages')
+                const ref = collection(db, 'messageRooms', `${para}b`, 'messages')
                 setDoc(doc(ref, id), {
                   id: id,
                   caption: mediaCaption,
@@ -304,7 +304,7 @@ const NewChatForm = ({selected, setSelected}) => {
             getDownloadURL(avatarRef).then(url => {
               mediaUrl = url
             }).then(() => {
-              const ref = collection(db, 'directMessages', `${para}a`, 'messages')
+              const ref = collection(db, 'messageRooms', `${para}a`, 'messages')
               setDoc(doc(ref, id), {
                 id: id,
                 caption: mediaCaption,
@@ -317,7 +317,7 @@ const NewChatForm = ({selected, setSelected}) => {
                 isSent: false
         
               }).then(() => {
-                const ref = collection(db, 'directMessages', `${para}b`, 'messages')
+                const ref = collection(db, 'messageRooms', `${para}b`, 'messages')
                 setDoc(doc(ref, id), {
                   id: id,
                   caption: mediaCaption,
@@ -361,7 +361,7 @@ const NewChatForm = ({selected, setSelected}) => {
               }
             }).then(() => {
               if (postsArr.length === fileLength) {
-                const ref = collection(db, 'directMessages', `${para}a`, 'messages')
+                const ref = collection(db, 'messageRooms', `${para}a`, 'messages')
                 setDoc(doc(ref, id), {
                   id: id,
                   caption: mediaCaption,
@@ -374,7 +374,7 @@ const NewChatForm = ({selected, setSelected}) => {
                   isSent: false
           
                 }).then(() => {
-                  const ref = collection(db, 'directMessages', `${para}b`, 'messages')
+                  const ref = collection(db, 'messageRooms', `${para}b`, 'messages')
                   setDoc(doc(ref, id), {
                     id: id,
                     caption: mediaCaption,
@@ -413,7 +413,7 @@ const NewChatForm = ({selected, setSelected}) => {
 
       const start = async () => {
         if (paraCondition === 1) {
-          setDoc(doc(directMessagesRef, `${para}a`), {
+          setDoc(doc(messageRoomsRef, `${para}a`), {
             mainUser: user?.id,
             otherUser: select.id,
             chatDateMarker: [],
@@ -421,7 +421,7 @@ const NewChatForm = ({selected, setSelected}) => {
             activeLast: 0
   
           }).then(() => {
-            setDoc(doc(directMessagesRef, `${para}b`), {
+            setDoc(doc(messageRoomsRef, `${para}b`), {
               mainUser: select.id,
               otherUser: user?.id,
               chatDateMarker: [],
@@ -429,7 +429,7 @@ const NewChatForm = ({selected, setSelected}) => {
               activeLast: 0
             })
           }).then(() => {
-            const ref = collection(db, 'users', user?.id, 'directMessages')
+            const ref = collection(db, 'users', user?.id, 'messageRooms')
             setDoc(doc(ref, `${para}a`), {
               id: `${para}a`,
               mostRecentMessage: '',
@@ -440,7 +440,7 @@ const NewChatForm = ({selected, setSelected}) => {
               user: select.id,
               lastSeen: 0
             }).then(() => {
-              const ref = collection(db, 'users', select.id, 'directMessages')
+              const ref = collection(db, 'users', select.id, 'messageRooms')
               setDoc(doc(ref, `${para}b`), {
                 id: `${para}b`,
                 mostRecentMessage: '',
@@ -455,7 +455,7 @@ const NewChatForm = ({selected, setSelected}) => {
           })
   
         } else {
-          setDoc(doc(directMessagesRef, `${para}a`), {
+          setDoc(doc(messageRoomsRef, `${para}a`), {
             mainUser: select.id,
             otherUser: user?.id,
             chatDateMarker: [],
@@ -463,7 +463,7 @@ const NewChatForm = ({selected, setSelected}) => {
             activeLast: 0
   
           }).then(() => {
-            setDoc(doc(directMessagesRef, `${para}b`), {
+            setDoc(doc(messageRoomsRef, `${para}b`), {
               mainUser: user?.id,
               otherUser: select.id,
               chatDateMarker: [],
@@ -471,7 +471,7 @@ const NewChatForm = ({selected, setSelected}) => {
               activeLast: 0
             })
           }).then(() => {
-            const ref = collection(db, 'users', user?.id, 'directMessages')
+            const ref = collection(db, 'users', user?.id, 'messageRooms')
             setDoc(doc(ref, `${para}b`), {
               id: `${para}b`,
               mostRecentMessage: '',
@@ -482,7 +482,7 @@ const NewChatForm = ({selected, setSelected}) => {
               user: select.id,
               lastSeen: 0
             }).then(() => {
-              const ref = collection(db, 'users', select.id, 'directMessages')
+              const ref = collection(db, 'users', select.id, 'messageRooms')
               setDoc(doc(ref, `${para}a`), {
                 id: `${para}a`,
                 mostRecentMessage: '',

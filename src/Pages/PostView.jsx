@@ -1,92 +1,196 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { appContext } from '../App'
-import {v4 as uuidv4} from 'uuid';
-import { FaRegHeart, FaRegComment, FaShareSquare, FaPaperPlane, FaImage, FaAngleLeft, FaAngleRight } from 'react-icons/fa'
-import Comment from '../Components/Comment'
-import ReplyForm from '../Components/ReplyForm'
-import ReplyReplyForm from '../Components/ReplyReplyForm'
-import Options from '../Components/Options'
-import Header from '../Components/Header'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { db, storage } from '../firebase/config'
-import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
-import LoadPosts from '../Components/LoadPosts'
-import Nav from '../Components/Nav'
-import Footer from '../Components/Footer'
-import loadVideoLight from '../Images/load-video-light.mp4'
-import verifiedBadge from '../Images/verified-badge.jpg'
-import OtherCommentOptions from '../Components/OtherCommentOptions';
-import CommentOptions from '../Components/CommentOptions';
+import Comment from '../COMPONENTS/Comment'
+import LoadPosts from '../COMPONENTS/LoadPosts'
+import Nav from '../COMPONENTS/Nav'
+import Footer from '../COMPONENTS/Footer'
+import postNotFoundImg from '../Images/no-media-found-IV.jpg'
+import Post from '../COMPONENTS/Post';
+import BackButton from '../COMPONENTS/GENERAL-COMPONENTS/BackButton'
+import Header from '../COMPONENTS/Header'
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore'
+import { postsRef } from '../firebase/config'
+import LoginMessage from '../COMPONENTS/GENERAL-COMPONENTS/LoginMessage'
+import ReplyView from '../COMPONENTS/ReplyView'
 
-const PostView = () => {
+
+
+const initialState = {
+  thisPost: null,
+  thisPostCreator: null,
+  thisPostComments: null,
+  thisComment: null,
+  thisCommentCreator: null,
+  thisCommentReplies: null,
+  thisReply: null,
+  thisReplyCreator: null,
+  thisReplyReplies: null,
+  postNotFound: false,
+  postCreatorNotFound: false,
+  commentNotFound: false,
+  commentCreatorNotFound: false,
+  replyNotFound: false,
+  replyCreatorNotFound: false,
+};
+
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_POST':
+      return { ...state, thisPost: action.payload };
+    case 'SET_POST_CREATOR':
+      return { ...state, thisPostCreator: action.payload };
+    case 'SET_POST_COMMENTS':
+      return { ...state, thisPostComments: action.payload };
+    case 'SET_COMMENT':
+      return { ...state, thisComment: action.payload };
+    case 'SET_COMMENT_CREATOR':
+      return { ...state, thisCommentCreator: action.payload };
+    case 'SET_COMMENT_REPLIES':
+      return { ...state, thisCommentReplies: action.payload };
+    case 'SET_REPLY':
+      return { ...state, thisReply: action.payload };
+    case 'SET_REPLY_CREATOR':
+      return { ...state, thisReplyCreator: action.payload };
+    case 'SET_REPLY_COMMENTS':
+      return { ...state, thisReplyReplies: action.payload };
+    case 'SET_POST_NOT_FOUND':
+      return { ...state, postNotFound: action.payload };
+    case 'SET_POST_CREATOR_NOT_FOUND':
+      return { ...state, postCreatorNotFound: action.payload };
+    case 'SET_COMMENT_NOT_FOUND':
+      return { ...state, commentNotFound: action.payload };
+    case 'SET_COMMENT_CREATOR_NOT_FOUND':
+      return { ...state, commentCreatorNotFound: action.payload };
+    case 'SET_REPLY_NOT_FOUND':
+      return { ...state, replyNotFound: action.payload };
+    case 'SET_REPLY_CREATOR_NOT_FOUND':
+      return { ...state, replyCreatorNotFound: action.payload };
+    default:
+      return state;
+  }
+}
+
+
+const PostView = ({ viewFor }) => {
+  const { postId, commentId, replyId } = useParams()
   const {
-  allPosts, handleLike, newComment, setNewComment, users, userAuth, showReplyForm, commentId, user, showOptionsDIv, setShowOptionsDiv, setShowShareMenu, showShareMenu, day, month, year, hours, mins, period, processingType, processing, setProcessing, windowWidth, gError, setGlobalError, setSelectedMessage, 
+  allPosts, users, showReplyForm, setShowShareMenu, showShareMenu, setSelectedMessage, setShowPostForm, setPostFormFor, setPostFormIDs, postFormIDs, user
   } = useContext(appContext)
-  const { postId } = useParams()
-  const [post, setPost] = useState() 
-  const [postCreator, setPostCreator] = useState()
+
+  const [loading, setLoading] = useState(true)
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [POST, SETPOST] = useState(null)
+  const [COMMENTS, SETCOMMENTS] = useState(null)
+
+  const { thisPost, thisPostCreator, thisPostComments, thisComment, thisCommentCreator, thisCommentReplies, thisReply, thisReplyCreator, thisReplyReplies, postNotFound, postCreatorNotFound, commentNotFound, commentCreatorNotFound, replyCreatorNotFound, replyNotFound } = state
+  
+
+  const postSectionRef = useRef(null)
   const comtId = useRef('')
   const RepId = useRef('')
-  const time = new Date()
-  const [loading, setLoading] = useState(true)
+
+  const navigate = useNavigate()
+
   const loadArr = [1, 2, 3, 4, 5]
-  const [mediaProcessing, SetMediaProcessing] = useState(false)
-  const [commentIndex, setCommentIndex] = useState(0)
-  const [newTextComment, setNewTextComment] = useState('')
-  const [commentMediaCaption, setCommentMediaCaption] = useState('')
-  const [commentMediaProcessing, setCommentMediaProcessing] = useState(false)
-  const [files, setFiles] = useState([])
-  const [fileLength, setFileLength] = useState(0)
-  const [index, setIndex] = useState(0)
-  const [commentIsOnePic, setCommentIsOnePic] = useState(false)
-  const [commentIsOneVid, setCommentIsOneVid] = useState(false)
-  const [notFound, setNotFound] = useState(false)
-  const picComment = useRef(null)
-  const vidComment = useRef(null)
-  const [trigger, setTrigger] = useState(false)
-  const groupRef = useRef()
-  const btnRef = useRef()
+
+
 
   useEffect(() => {
-    const callOn = () => {
-      if (btnRef.current) {
-        btnRef.current.style.visibility = 'visible'
+    const fetchPosts = async () => {
+      try {
+        const loadingPost = allPosts.find(post => post.id === postId);
+        const loadingPostCreator = users.find(person => person.id === loadingPost?.creator);
+  
+        let loadingComment = null;
+        let loadingCommentCreator = null;
+        if (commentId) {
+          const commentRef = doc(postsRef, postId, 'comments', commentId);
+          loadingComment = await getDoc(commentRef);
+          loadingCommentCreator = users?.find(user => user.id === loadingComment.data()?.creator) 
+        } 
+  
+        let loadingReply = null;
+        let loadingReplyCreator = null;
+        if (commentId && replyId) {
+          const replyRef = doc(postsRef, postId, 'comments', commentId, 'replies', replyId);
+          loadingReply = await getDoc(replyRef);
+          loadingReplyCreator = users?.find(user => user.id === loadingReply.data()?.creator) 
+        } 
+        
+
+        if (loadingPost && loadingPostCreator) {
+          dispatch({ type: 'SET_POST', payload: loadingPost });
+          dispatch({ type: 'SET_POST_CREATOR', payload: loadingPostCreator });
+          dispatch({ type: 'SET_POST_NOT_FOUND', payload: false });
+        } else {
+          dispatch({ type: 'SET_POST_NOT_FOUND', payload: true });
+        }
+  
+        if (loadingComment && loadingCommentCreator) {
+          dispatch({ type: 'SET_COMMENT', payload: loadingComment.data() });
+          dispatch({ type: 'SET_COMMENT_CREATOR', payload: loadingCommentCreator });
+          dispatch({ type: 'SET_COMMENT_NOT_FOUND', payload: false });
+        } else {
+          dispatch({ type: 'SET_COMMENT_NOT_FOUND', payload: true });
+        }
+  
+        if (loadingReply && loadingReplyCreator) {
+          dispatch({ type: 'SET_REPLY', payload: loadingReply.data() });
+          dispatch({ type: 'SET_REPLY_CREATOR', payload: loadingReplyCreator });
+          dispatch({ type: 'SET_REPLY_NOT_FOUND', payload: false });
+        } else {
+          dispatch({ type: 'SET_REPLY_NOT_FOUND', payload: true });
+        }
+      } catch (error) {
+        console.error("Error fetching posts or data:", error);
+
+      } finally {
+        // setLoading(false);
       }
+    };
+  
+    if (allPosts && users) {
+      fetchPosts();
     }
+  }, [postId, commentId, replyId, allPosts, users]);
 
-    const callOff = () => {
-      if (btnRef.current) {
-        btnRef.current.style.visibility = 'hidden'
-      }
-    }
 
-    groupRef.current?.addEventListener('mouseover', function () {
-      callOn()
-      setTrigger(!trigger)
-    })
 
-    groupRef.current?.addEventListener('mouseleave', function () {
-      setTimeout(() => {
-        callOff()
-        setTrigger(!trigger)
-      }, 2000);
-    })
-    // return () => groupRef.current
-  }, [trigger])
 
   useEffect(() => {
-    setPost(allPosts?.find(post => post.id == postId))
-  }, [allPosts])
+    if (thisPost) {
+      const commentRef = collection(postsRef, thisPost.id, 'comments')
+      const q = query(commentRef, orderBy("createdAt", "desc"))
 
-  useEffect(() => {
-    setPostCreator(users.find(person => person.id === post?.creator))
-    if (post) {
-      setTimeout(() => {
-        setLoading(false)
-      }, 1000)
+      onSnapshot(q, snap => {
+        const commentsArr = []
+        snap.docs.forEach(doc => {
+          commentsArr.push({ ...doc.data(), id: doc.id })
+        })
+
+        dispatch({ type: 'SET_POST_COMMENTS', payload: [...commentsArr] });
+      })
     }
-  }, [post])
+
+
+    if (thisComment && thisPost) {
+      const replyRef = collection(postsRef, thisPost.id, 'comments', thisComment.id, 'replies')
+      const q = query(replyRef, orderBy("createdAt", "desc"))
+
+      onSnapshot(q, snap => {
+        const repliesArr = []
+        snap.docs.forEach(doc => {
+          repliesArr.push({ ...doc.data(), id: doc.id })
+        })
+
+        dispatch({ type: 'SET_COMMENT_REPLIES', payload: [...repliesArr] });
+      })
+    }
+  }, [thisPost, thisComment])
+
+
 
   useEffect(() => {
     if (!showShareMenu) {
@@ -94,540 +198,79 @@ const PostView = () => {
     }
   }, [showShareMenu])
 
+
+
   useEffect(() => {
-    const div = document.querySelector('.multiple-media-div')
-    const photoTypes = ['image/png', 'image/jpeg', 'image/jpg']
-    const vidTypes = ['video/mp4', 'video/mov', 'video/quicktime', 'video/wmv']
-    if (fileLength === 1) {
-      if (photoTypes.includes(files[0]?.type)) {
-        const selected = files[0]
-        setCommentMediaProcessing(true)
-        setCommentIsOnePic(true)
-        setCommentIsOneVid(false)
-  
-        const avatarRef = ref(storage, `pending-img-comments${time.getTime()}/${userAuth}`)
-        uploadBytes(avatarRef, selected).then(() => {
-          getDownloadURL(avatarRef).then(url => {
-            picComment.current = url
-          }).then(() => {
-            document.querySelector('.new-img-comment').src = picComment.current
-            setCommentMediaProcessing(false)
-          })
-        })
-      } else if (vidTypes.includes(files[0]?.type)) {
-        const selected = files[0]
-        setCommentMediaProcessing(true)
-        setCommentIsOnePic(false)
-        setCommentIsOneVid(true)
-  
-        const avatarRef = ref(storage, `pending-vid-comments${userAuth}/${userAuth}`)
-        uploadBytes(avatarRef, selected).then(() => {
-          getDownloadURL(avatarRef).then(url => {
-            vidComment.current = url
-          }).then(() => {
-            document.querySelector('.new-vid-comment').src = vidComment.current
-            setCommentMediaProcessing(false)
-          })
-        })
-      } else {
-        setFiles([])
-        setFileLength(prev => prev - prev)
-        gError?.classList.add('show-error')
-        // setGlobalError(`Your post wasn't sent. Try Again.`)
-        setTimeout(() => {
-          gError?.classList.remove('show-error')
-        }, 3000 )
+    if (viewFor === 'post') {
+      if (thisPost) {
+        SETPOST(thisPost)
+        SETCOMMENTS(thisPostComments)
       }
-    } else if (fileLength > 1) {
-      const postsArr = []
-      
-      const run = () => {
-        if (postsArr.length === fileLength) {
-          postsArr.map((item, i) => {
-            let currState = index === i ? 'visible' : 'hidden'
-            if (item.type === 'img') {
-              const img = document.createElement('img')
-              img.setAttribute('class', `new-img-post ${currState} media`)
-              img.setAttribute('src', item.url)
-              div.appendChild(img)
-            } else {
-              const vid = document.createElement('video')
-              vid.setAttribute('class', `new-vid-post ${currState} media`)
-              vid.setAttribute('src', item.url)
-              vid.setAttribute('autoplay', true)
-              div.appendChild(vid)
-            }
-          })
+
+    } else if (viewFor === 'comment') {
+      if (thisComment) {
+        SETPOST(thisComment)
+        SETCOMMENTS(thisCommentReplies)
+      }
+
+    } else if (viewFor === 'reply') {
+      if (thisReply) {
+        SETPOST(thisReply)
+        SETCOMMENTS(thisCommentReplies)
+      }
+    }
+  }, [viewFor, thisPost, thisPostComments, thisComment, thisCommentReplies, thisReply])
+
+
+  useEffect(() => {
+    if (POST) {
+      if (viewFor === 'post') {
+        if (thisPostCreator) {
+          setLoading(false)
+        }
+  
+      } else if (viewFor === 'comment') {
+        if (thisCommentCreator) {
+          setLoading(false)
+        }
+  
+      } else if (viewFor === 'reply') {
+        if (thisReplyCreator) {
+          setLoading(false)
         }
       }
-
-      for (let i = 0; i < fileLength; i++) {
-        let mediaUrl
-        const selected = files[i]
-        const avatarRef = ref(storage, `pending-posts${files[i].name}/${files[i].name}`)
-        uploadBytes(avatarRef, selected).then(() => {
-          getDownloadURL(avatarRef).then(url => {
-            mediaUrl = url
-          }).then(() => {
-            if (vidTypes.includes(files[i].type)) {
-              postsArr.push({
-                type: 'video',
-                url: mediaUrl
-              })
-            } else if (photoTypes.includes(files[i].type)) {
-              postsArr.push({
-                type: 'img',
-                url: mediaUrl
-              })
-            } else {
-              setFiles([])
-              setFileLength(prev => prev - prev)
-              gError.current?.classList.add('show-error')
-              setGlobalError(`Your comment wasn't sent. Try Again.`)
-              setTimeout(() => {
-                gError.current?.classList.remove('show-error')
-              }, 3000 )
-            }
-          }).then(() => run())
-        })
-      }
     }
-  }, [files])
+  }, [POST, thisPostCreator, thisCommentCreator, thisReplyCreator])
 
-  useEffect(() => {
-    const div = document.querySelector('.multiple-media-div')
-    const media = div?.querySelectorAll('.media')
-    media?.forEach((item, i) => {
-      if (index === i) {
-        item.classList.add('visible')
-        item.classList.remove('hidden')
-        item.setAttribute('muted', false)
-      } else {
-        item.classList.remove('visible')
-        item.classList.add('hidden')
-        item.setAttribute('muted', true)
-      }
-    })
-  }, [index])
 
-  useEffect(() => {
-    return () => {
-      const main = document.querySelector('main')
-      const allVideos = main.querySelectorAll('video')
-      allVideos.forEach(video => video.pause())
-    }
-  }, [])
-  
 
   
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      // const post = allPosts?.find(post => post.id === postId)
-      if (post === undefined) {
-        setNotFound(true)
-        setLoading(false)
-      } else {
-        setNotFound(false)
+    if (!loading) {
+      if (postSectionRef.current) {
+        const elementPosition = postSectionRef.current.getBoundingClientRect().top + window.scrollY; 
+        const offsetPosition = elementPosition - 41; 
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth' 
+        });
       }
-    }, 2000);
-
-    clearTimeout(timeout)
-  }, [post])
-
-
-  // useEffect(() => {
-  //   if (!loading) {
-  //     const main = document.querySelector('main')
-  //     const div = document.querySelector('.group-media-div')
-  //     const videos = div.querySelectorAll('video')
-
-  //     videos.forEach(video => {
-  //       const cond = video.classList.contains('curr-media')
-  //       if (!cond) {
-  //         video.pause()
-  //       }
-  //     })
-
-  //     main.addEventListener('click', e => {
-  //       console.log(e.currentTarget)
-  //       console.log(e.target)
-  //     })
-
-  //     const allVideos = main.querySelectorAll('video')
-  //     allVideos.forEach(video => video.pause())
-      
-  //     allVideos.forEach(video => {
-  //       video.addEventListener('click', (e) => {
-  //         console.log(allVideos)
-  //         allVideos.forEach(video => video.pause())
-  //         e.currentTarget.play()
-  //       })
-  //     })
-  //   }
-  // }, [commentIndex, loading])
-
-  // useEffect(() => {
-  //   const div = document.querySelector('.multiple-media-div')
-  //   const media = div?.querySelectorAll('.media')
-  //   media?.forEach((item, i) => {
-  //     if (index === i) {
-  //       item.classList.add('curr-media')
-  //       item.classList.remove('prev-media')
-  //       item.classList.remove('next-media')
-  //       item.setAttribute('muted', 'false')
-
-  //     } else if ((index + 1) === i) {
-  //       item.classList.remove('curr-media')
-  //       item.classList.remove('prev-media')
-  //       item.classList.add('next-media')
-  //       item.setAttribute('muted', 'true')
-
-  //     } else if ((index - 1) === i) {
-  //       item.classList.remove('curr-media')
-  //       item.classList.add('prev-media')
-  //       item.classList.remove('next-media')
-  //       item.setAttribute('muted', 'true')
-
-  //     } else {
-  //       item.classList.remove('curr-media')
-  //       item.classList.remove('prev-media')
-  //       item.classList.remove('next-media')
-  //       item.setAttribute('muted', 'true')
-  //     }
-  //   })
-  // }, [index])
-
-  const addComment = async (id, comment) => {
-    processingType.current = 'Comment sent'
-    const docRef = doc(db, 'posts', id)
-    const commentRef = collection(db, 'posts', id, 'comments')
-    // const commentQuery = query(commentRef, orderBy('createdAt', 'desc'))
-
-    try {
-      if (files[0] === undefined) {
-        if (newTextComment !== '') {
-          const id = uuidv4()
-          setDoc(doc(commentRef, id), {
-            id: id,
-            type: 'Text-Comment' ,
-            body: comment,
-            date: `${day}/${month}/${year}`,
-            time: `${hours}:${mins} ${period}`, 
-            creator: userAuth,
-            createdAt: serverTimestamp(),
-            likes: {value: []},
-            replies: {value: []},
-            shares: {value: []},
-            beenChecked: false
-          }).then(docRef => {
-            const notiId = uuidv4()
-            const words = comment.split(/['.', '/',' ', ':', ';', ',']/)
-            users.map(user => {
-              const condition = words.find(word => word === `@${user?.username}` )
-              if (condition) {
-                const userRef = doc(db, 'users', user.id)
-                updateDoc(userRef, {
-                  notifications: {
-                    value: [...user.notifications.value, {
-                      id: notiId,
-                      type: 'comment-tag', 
-                      taggedBy: userAuth,
-                      value: id, 
-                      postId: postId,
-                      sentAt: time.getTime()
-                    }]
-                  }
-                })
-              }
-            })
-            setProcessing(true)
-            setNewTextComment('')
-          }).then(() => {
-            const notiId = uuidv4()
-            const userRef = doc(db, 'users', post.creator)
-            const creator = users.find(user => user.id === post.creator)
-            updateDoc(userRef, {
-              notifications: {
-                value: [...creator.notifications.value, {
-                  id: notiId,
-                  type: 'post-reply',
-                  value: post.id,
-                  repliedBy: userAuth,
-                  sentAt: time.getTime()
-                }]
-              }
-            })
-          }).catch((err) => {
-            console.log(err.message)
-            gError.current?.classList.add('show-error')
-            setGlobalError(`Your comment wasn't sent. Try Again.`)
-            setTimeout(() => {
-              gError.current?.classList.remove('show-error')
-            }, 3000 )
-          }) 
-        } else {
-          gError.current?.classList.add('show-error')
-          setGlobalError(' Can not send an empty comment ')
-          setTimeout(() => {
-            gError.current?.classList.remove('show-error')
-          }, 3000 )
-        }
-
-      } else if (fileLength === 1) {
-        if (commentIsOnePic) {
-          const selected = files[0]
-          let photoUrl
-          const avatarRef = ref(storage, `photo-comments${userAuth}/${time.getTime().toString()}`)
-          uploadBytes(avatarRef, selected).then(() => {
-            getDownloadURL(avatarRef).then(url => {
-              photoUrl = url
-            }).then(() => {
-              const id = uuidv4()
-              setDoc(doc(commentRef, id), {
-                id: id,
-                type: 'Photo-Comment',
-                caption: commentMediaCaption,
-                body: photoUrl,
-                date: `${day}/${month}/${year}`,
-                time: `${hours}:${mins} ${period}`,
-                creator: userAuth,
-                createdAt: serverTimestamp(),
-                likes: { value: [] },
-                replies: { value: [] },
-                shares: {value: []},
-                beenChecked: false
-              }).then(docRef => {
-                const notiId = uuidv4()
-                const words = commentMediaCaption.split(/['.', '/',' ', ':', ';', ',']/)
-                users.map(user => {
-                  const condition = words.find(word => word === `@${user?.username}` )
-                  if (condition) {
-                    const userRef = doc(db, 'users', user.id)
-                    updateDoc(userRef, {
-                      notifications: {
-                        value: [...user.notifications.value, {
-                          id: notiId,
-                          type: 'comment-tag', 
-                          taggedBy: userAuth,
-                          value: id, 
-                          postId: postId,
-                          sentAt: time.getTime()
-                        }]
-                      }
-                    })
-                  }
-                })
-                setProcessing(true)
-                setNewTextComment('')
-                setFiles([])
-                setFileLength(prev => prev - prev)
-                setCommentMediaCaption('')
-              }).then(() => {
-                const notiId = uuidv4()
-                const userRef = doc(db, 'users', post.creator)
-                const creator = users.find(user => user.id === post.creator)
-                updateDoc(userRef, {
-                  notifications: {
-                    value: [...creator.notifications.value, {
-                      id: notiId,
-                      type: 'post-reply',
-                      value: post.id,
-                      repliedBy: userAuth,
-                      sentAt: time.getTime()
-                    }]
-                  }
-                })
-              })
-            })
-          })
-        } else if (commentIsOneVid) {
-          const id = uuidv4()
-          const selected = files[0]
-          let vidUrl
-          const avatarRef = ref(storage, `media-comments${userAuth}/${time.getTime().toString()}`)
-          uploadBytes(avatarRef, selected).then(() => {
-            getDownloadURL(avatarRef).then(url => {
-              vidUrl = url
-            }).then(() => {
-              setDoc(doc(commentRef, id), {
-                id: id,
-                type: 'Video-Comment',
-                caption: commentMediaCaption,
-                body: vidUrl,
-                date: `${day}/${month}/${year}`,
-                time: `${hours}:${mins} ${period}`, 
-                creator: userAuth,
-                createdAt: serverTimestamp(),
-                likes: {value: []},
-                replies: {value: []},
-                shares: {value: []},
-                beenChecked: false
-              })
-            }).then(docRef => {
-              const notiId = uuidv4()
-              const words = commentMediaCaption.split(/['.', '/',' ', ':', ';', ',']/)
-              users.map(user => {
-                const condition = words.find(word => word === `@${user?.username}` )
-                if (condition) {
-                  const userRef = doc(db, 'users', user.id)
-                  updateDoc(userRef, {
-                    notifications: {
-                      value: [...user.notifications.value, {
-                        id: notiId,
-                        type: 'comment-tag', 
-                        taggedBy: userAuth,
-                        value: id, 
-                        postId: postId,
-                        sentAt: time.getTime()
-                      }]
-                    }
-                  })
-                }
-              })
-              setProcessing(true)
-              setFiles([])
-              setFileLength(prev => prev - prev)
-              setCommentMediaCaption('')
-            }).then(() => {
-              const notiId = uuidv4()
-              const userRef = doc(db, 'users', post.creator)
-              const creator = users.find(user => user.id === post.creator)
-              updateDoc(userRef, {
-                notifications: {
-                  value: [...creator.notifications.value, {
-                    id: notiId,
-                    type: 'post-reply',
-                    value: post.id,
-                    repliedBy: userAuth,
-                    sentAt: time.getTime()
-                  }]
-                }
-              })
-            })
-          })
-        }
-      } else {
-        const postsArr = []
-        const types = ['video/mp4', 'video/mov', 'video/quicktime', 'video/wmv']
-
-        for (let i = 0; i < fileLength; i++) {
-          let mediaUrl
-          const selected = files[i]
-          const avatarRef = ref(storage, `img/vid-posts${files[i].name}/${files[i].name}`)
-          uploadBytes(avatarRef, selected).then(() => {
-            getDownloadURL(avatarRef).then(url => {
-              mediaUrl = url
-            }).then(() => {
-              if (types.includes(files[i].type)) {
-                postsArr.push({
-                  type: 'video',
-                  url: mediaUrl
-                })
-              } else {
-                postsArr.push({
-                  type: 'img',
-                  url: mediaUrl
-                })
-              }
-            }).then(() => {
-              if (postsArr.length === fileLength) {
-                const id = uuidv4()
-                setDoc(doc(commentRef, id), {
-                  id: id,
-                  type: 'Group-Comment',
-                  caption: commentMediaCaption,
-                  body: postsArr,
-                  date: `${day}/${month}/${year}`,
-                  time: `${hours}:${mins} ${period}`, 
-                  creator: userAuth,
-                  createdAt: serverTimestamp(),
-                  likes: {value: []},
-                  replies: {value: []},
-                  shares: {value: []},
-                  beenChecked: false
-                }).then(docRef => {
-                  const notiId = uuidv4()
-                  const words = commentMediaCaption.split(/['.', '/',' ', ':', ';', ',']/)
-                  users.map(user => {
-                    const condition = words.find(word => word === `@${user?.username}` )
-                    if (condition) {
-                      const userRef = doc(db, 'users', user.id)
-                      updateDoc(userRef, {
-                        notifications: {
-                          value: [...user.notifications.value, {
-                            id: notiId,
-                            type: 'comment-tag', 
-                            taggedBy: userAuth,
-                            value: id, 
-                            postId: postId,
-                            sentAt: time.getTime()
-                          }]
-                        }
-                      })
-                    }
-                  })
-                  setProcessing(true)
-                  setFileLength(prev => prev - prev)
-                  setFiles([])
-                  setCommentMediaCaption('')
-                }).then(() => {
-                  const notiId = uuidv4()
-                  const userRef = doc(db, 'users', post.creator)
-                  const creator = users.find(user => user.id === post.creator)
-                  updateDoc(userRef, {
-                    notifications: {
-                      value: [...creator.notifications.value, {
-                        type: 'post-reply',
-                        id: notiId,
-                        value: post.id,
-                        repliedBy: userAuth,
-                        sentAt: time.getTime()
-                      }]
-                    }
-                  })
-                })
-              }
-            })
-          })
-        }
-      }
-
-    } catch(err) {
-      console.log(err.message)
-    } finally {
-      onSnapshot(commentRef, snap => {
-        let tempComments = []
-        snap.docs.forEach(doc => {
-          tempComments.push({ ...doc.data() })
-        })
-        updateDoc(docRef, {
-          comments: {
-            value: tempComments
-          }
-        })
-      })
     }
-  }
+  }, [loading, postId, commentId])
 
-  function isLinkElement(textContent) {
-    // Check if the element has a link-like appearance (e.g., starts with 'http', 'https', 'www', or 'ftp')
-    const text = textContent;
-    
-    const linkLikeRegexB = /^(https?|www\.|ftp)/gi;
-    const linkLikeRegexE = /(\.com|\.de|\.org|\.net|\.us|\.co|\.edu|\.gov|\.biz|\.za|\.info|\.cc|\.ca|\.cn|\.fr|\.ch|\.au|\.in|\.jp|\.be|\.it|\.nl|\.uk|\.mx|\.no|\.ru|\.br|\.se|\.es|\.at|\.dk|\.eu|\.il)$/gi;
 
-    if (linkLikeRegexB.test(text) || linkLikeRegexE.test(text)) {
-      return true
-    } else {
-      return false 
-    }
-  }
+
+
 
   if (loading) {
     return (
       <main className="post-view-main post-view-main-loading">
-      <Header />
-      <Nav />
+        <PostViewHeader />
+        <Nav />
+
+        <LoginMessage />
+
         <div className="pv-post-loading">
           <div className="pvp-upper-sect">
             <div className="pvp-img-loading"></div>
@@ -650,347 +293,137 @@ const PostView = () => {
         }
       </main>
     )
-  } else {
+  } else if (postNotFound) {
     return (
-      <main style={showReplyForm ? { paddingBottom: '55vh' } : { paddingBottom: '3rem' }} className="post-view-main" onClick={e => {
-        if (showShareMenu) { 
-          setShowShareMenu(false)
-        }
-      }} >
-  
-        {post?.creator === userAuth ?
-          <Options func={[
-            { id: postId , text: 'Bookmark post', prop: 'bookmark-post' },
-            { id: postId, text: 'Delete post', prop: 'delete-post red pv' }
-            ]}
-          />
-          : 
-          <Options func={[
-            { id: postId , text: 'Bookmark post', prop: 'bookmark-post' }
-            ]}
-          />
-        }
-        <Header />
+      <main className="post-view-main post-postNotFound">
+        <PostViewHeader />
+        
         <Nav />
+
+        <LoginMessage />
+
+        <div className="post-not-found">
+          <img src={postNotFoundImg} alt=""/>
+          <h2>Oops...</h2>
+          <p>Looks like this post was deleted.</p>
+          <Link to={-1}>Back</Link>
+        </div>
+        <Footer />
+      </main>
+      )
+  } else {
+    const { id } = POST
+
+    return (
+      <main className="post-view-main"
+        style={{
+          minHeight: viewFor !== 'post' ? '200vh' : ''
+        }}
+        onClick={e => {
+          if (showShareMenu) { 
+            setShowShareMenu(false)
+          }
+        }}
+      >
+
+        <LoginMessage />
   
-        <section className="post-view-content">
-  
-          <div className="upper-sect">
-            <Link to={post?.creator}>
-              <div className="upper-sect-img-div">
-                <img src={postCreator?.avatarUrl} alt="" />
-              </div>
-  
-              <div className="post-username-div">
-                <p className="post-display-name">
-                  {postCreator?.displayName}  {postCreator?.userType === 'creator' && <img src={verifiedBadge} className='verified-badge' alt="" />}
-                </p>
-                <p className="post-username"> @{postCreator?.username} </p>
-              </div>
-            </Link>
-  
-            <div className='upper-sect-options' onClick={() => {
-              setShowOptionsDiv(!showOptionsDIv)
-            }}>
-              <p>.</p>
-              <p>.</p>
-              <p>.</p>
-            </div>
-          </div>
-  
-          <div className="middle-sect">
-            {post?.type === 'Text' &&
-              <pre>
-                {isLinkElement(post?.body) ?
-                  
-                  <a className='out-link' href={post?.body.includes('http://') || post?.body.includes('https://') ? `${post?.body}` : `http://${post?.body}`} target='_blank'>
-                    {post?.body}
-                  </a>
-                  :
-                  <>
-                    {post?.body}
-                  </>
-                }
-              </pre>
+        <PostViewHeader />
+
+        <Nav />
+
+        {viewFor === 'comment' || viewFor === 'reply' ?
+          <section className="cv-post-section">
+            {thisPost &&
+              <Post post={thisPost} />
             }
-  
-            {post?.type === 'Picture-Media' &&
-              <div className="img-post-body-div">
-                <pre>
-                  {isLinkElement(post?.caption) ?
-                    
-                    <a className='out-link' href={post?.caption.includes('http://') || post?.caption.includes('https://') ? `${post?.caption}` : `http://${post?.caption}`} target='_blank'>
-                      {post?.caption}
-                    </a>
-                    :
-                    <>
-                      {post?.caption}
-                    </>
-                  }
-                </pre>
-                <img className='img-post-body' src={post?.body} alt="" />
-              </div>
+          </section>
+          : <></>
+        }
+
+        {viewFor === 'reply' ?
+          <section className="cv-post-section">
+            {thisComment &&
+              <Comment comment={thisComment} postId={postId} commentType="full" />
             }
+          </section>
+          : <></>
+        }
+        
+        
   
-            {post?.type === 'Video-Media' &&
-              <div className="img-post-body-div">
-                <pre>
-                  {isLinkElement(post?.caption) ?
-                    
-                    <a className='out-link' href={post?.caption.includes('http://') || post?.caption.includes('https://') ? `${post?.caption}` : `http://${post?.caption}`} target='_blank'>
-                      {post?.caption}
-                    </a>
-                    :
-                    <>
-                      {post?.caption}
-                    </>
-                  }
-                </pre>
-                <video controls className='img-post-body' src={post?.body}></video>
-                {/* <div role={'button'} onClick={() => setPlayVideo(!playVideo)}>
-                  <div>
-                    {playVideo ? <FaPause /> : <FaPlay />}
-                  </div>  
-                </div> */}
-              </div>
-            }
+        <section ref={postSectionRef} id="post-view-content" className="post-view-content">
+          {viewFor === 'post' ?
+            <Post post={POST} />
 
-            {post?.type === 'Group-Media' &&
-              <div ref={groupRef} className="img-post-body-div">
-                <pre>
-                  {isLinkElement(post?.caption) ?
-                    
-                    <a className='out-link' href={post?.caption.includes('http://') || post?.caption.includes('https://') ? `${post?.caption}` : `http://${post?.caption}`} target='_blank'>
-                      {post?.caption}
-                    </a>
-                    :
-                    <>
-                      {post?.caption}
-                    </>
-                  }
-                </pre>
-
-                <div className='group-media-div'>
-                  <div className="post-number">
-                    {commentIndex + 1}/{post?.body.length}
-                  </div>
-                  <div ref={btnRef} className="scroll-posts postt">
-                    <button className='index-btn' style={{opacity: commentIndex === 0 && '0'}}
-                      onClick={() => {
-                      commentIndex !== 0 && setCommentIndex(prev => prev - 1)
-                    }}>
-                      <FaAngleLeft />
-                    </button>
-
-                    <button className='index-btn' style={{opacity: commentIndex === post?.body.length - 1 && '0'}}
-                      onClick={() => {
-                      commentIndex !== post?.body.length - 1 && setCommentIndex(prev => prev + 1)
-                    }}>
-                      <FaAngleRight />
-                    </button>
-                  </div>
-
-                  {post?.body.map((item, i) => {
-                    return (
-                      <div key={i}>
-                        {item.type === 'img' ?
-                          <>
-                            {commentIndex === i &&
-                              <img key={i} src={item.url} alt=""
-                                className='img-post-body group-media curr-media'
-                              />
-                            }
-
-                            {(commentIndex + 1) === i &&
-                              <img key={i} src={item.url} alt=""
-                                className='img-post-body group-media next-media'
-                              />
-                            }
-
-                            {(commentIndex - 1) === i &&
-                              <img key={i} src={item.url} alt=""
-                                className='img-post-body group-media prev-media'
-                              />
-                            }
-
-                            {commentIndex !== i && (commentIndex + 1) !== i && (commentIndex - 1) !== i &&
-                              <img key={i} src={item.url} alt=""
-                                className='img-post-body group-media'
-                              />
-                            }
-                          </>
-                          :
-                          item.type === 'video' &&
-                          <>
-                            {commentIndex === i &&
-                              <video key={i} src={item.url} alt="" controls
-                                className='vid-post-body group-media curr-media'
-                              ></video>
-                            }
-
-                            {(commentIndex + 1) === i &&
-                              <video key={i} src={item.url} alt="" controls
-                                className='vid-post-body group-media next-media'
-                              ></video>
-                            }
-
-                            {(commentIndex - 1) === i &&
-                              <video key={i} src={item.url} alt="" controls
-                                className='vid-post-body group-media prev-media'
-                              ></video>
-                            }
-
-                            {commentIndex !== i && (commentIndex + 1) !== i && (commentIndex - 1) !== i &&
-                              <video key={i} src={item.url} alt="" controls
-                                className='vid-post-body group-media'
-                              ></video>
-                            }
-                          </>
-                        }
-                      </div>
-                    )
-                  })}
-
-                  {post?.body.map((item, i) => {
-                   return  item.type === 'img' ?
-                     <img key={i} src={item.url} alt=""
-                       className="img-post-body sample"
-                     /> 
-                   :
-                   item.type === 'video' &&
-                     <video key={i} src={item.url} controls
-                      className="pv-vid-post-body sample"
-                      ></video>
-                  })}
-                </div>
-              </div>
-            }
-          </div>
-  
-          <div className="lower-sect">
-            <span  className="post-time"> {post?.time} </span>
-            <span onClick={() => handleLike(postId)}
-              style={ post?.likes.value.find(like => like === userAuth) ? { color: 'red' } : null }
-            >
-              <FaRegHeart style={ post?.likes.value.find(like => like === userAuth) ? { color: 'red' } : null }/> {post?.likes.value.length}
-            </span>
-            <span> <FaRegComment /> {post?.comments.value.length} </span>
-            <span onClick={() => {
-              setShowShareMenu(true)
-              setSelectedMessage({
-                post: post, typeOf: 'post', type: post.type
-              })
-            }}> <FaShareSquare /> {post?.shares.value.length} </span>
-          </div>
+            : viewFor === 'comment' ?
+              <Comment comment={POST} postId={postId} commentType="full" />
+              
+              : viewFor === 'reply' ?
+                <ReplyView postId={postId} commentId={commentId} reply={POST}
+                  replyType="full"
+                />
+                
+                : <></>
+          }
         </section>
   
         <section className="comment-section">
-          <form action="submit" onSubmit={e => {
-            e.preventDefault()
-            addComment(postId, newTextComment)
-          }}  >
-            <div className='media-icon-div'>
-              <label htmlFor='comment-media' >
-                <span>
-                  <FaImage />
-                </span>
-                {userAuth &&
-                  <input autoComplete='off' type="file" id='comment-media' name='comment-media' multiple='multiple'
-                  onClick={e => {
-                    e.target.value = null
-                    setCommentIsOnePic(false)
-                    setCommentIsOneVid(false)
-                  }}
-                  onChange={e => {
-                    setFiles(e.target.files)
-                    setFileLength( prev => (prev - prev) + e.target.files.length)
-                  }}
-                />
+          {user && user.id &&
+            <button className="comment-btn"
+              onClick={() => {
+                setShowPostForm(true)
+
+                if (commentId) {
+                  setPostFormFor("reply")
+                  setPostFormIDs(
+                    { ...postFormIDs, postId, commentId, replyId: id }
+                  )
+                  
+                } else {
+                  setPostFormFor("comment")
+                  setPostFormIDs({...postFormIDs, postId: id})
                 }
-              </label>
-            </div>
-  
-            <div className="comment-input-div">
-              <textarea autoComplete='off' type="text" placeholder='Leave a Comment' value={newTextComment} onChange={ e => setNewTextComment( e.target.value ) } ></textarea>
-            </div>
-  
-            <button  disabled={!userAuth && true} style={{opacity: !userAuth && 0.5}}>
-              <FaPaperPlane />
+              }}
+            >
+              <span>
+                Leave a comment
+              </span>
+
+              <span>
+                Post
+              </span>
             </button>
-          </form>
-  
-          <div style={{ display: `${files[0] ? 'block' : 'none'}` }} className="media-comment">
-            {fileLength > 0 &&
-            <div className="post-number">
-              {index + 1}/{fileLength}
-            </div>
-            }
-
-            {fileLength > 1 &&
-              <div className="scroll-posts">
-                <button onClick={e => {
-                  e.preventDefault()
-                  index !== 0 && setIndex(prev => prev - 1)
-                }}>
-                  <FaAngleLeft />
-                </button>
-
-                <button onClick={e => {
-                  e.preventDefault()
-                  index !== fileLength - 1 && setIndex(prev => prev + 1)
-                }}>
-                  <FaAngleRight />
-                </button>
-              </div>
-            }
-            <textarea autoComplete='off' value={commentMediaCaption} maxLength='500' onChange={e => setCommentMediaCaption(e.target.value)} name="media-comment-caption" id="media-comment-caption" cols="30" rows="10" placeholder='Your Caption'></textarea>
-
-            <div style={{ display: `${files[0] && mediaProcessing ? 'block' : 'none'}` }} className="comment-media-processing-overlay">
-              <video className="comment-media-processing-video" autoPlay muted loop src={loadVideoLight}></video>
-            </div>
-
-            {fileLength > 1 && <div className="multiple-media-div"></div>}
-
-            <img className='new-img-comment' style={commentIsOnePic ? { display: 'block' } : { display: 'none' }} src={picComment.current} alt="" />
-            
-            <video autoPlay className='new-vid-comment' style={commentIsOneVid ? {display: 'block'} : {display: 'none'}} src={vidComment.current}></video>
-          </div>
+          }
   
           <div className="comments">
-            {post?.comments.value.map((comment, index) => {
-              const { creator } = comment
-              if (creator === userAuth) {
+            {COMMENTS && COMMENTS
+              .filter(comment => comment.id !== replyId)
+              .map((comment, ind) => {
+              const { id } = comment
+
+              if (viewFor === 'post') {
                 return (
-                  <div key={index} className='post-div'>
-                    {index !== 0 && <hr />}
-                    <Comment key={comment.id} comment={comment} postId={postId}
-                      comtId={comtId} RepId={RepId} comments={post?.comments.value}
-                      func={[
-                        { id: comtId.current, text: 'Bookmark comment', prop: 'bookmark-comment' },
-                        { id: comtId.current, text: 'Delete comment', prop: 'delete-comment red' }
-                      ]}
-                    />
+                  <div key={id} className='post-div'>
+                    {ind !== 0 && <hr />}
+                    <Comment comment={comment} postId={thisPost.id} />
                   </div>
-                ) 
+                )
+
               } else {
                 return (
-                  <div key={index} className='post-div'>
-                    {index !== 0 && <hr />}
-                    <Comment key={comment.id} comment={comment} postId={postId}
-                      comtId={comtId} RepId={RepId} comments={post?.comments.value}
-                      func={[
-                        { id: comtId.current, text: 'Bookmark comment', prop: 'bookmark-comment' }
-                      ]}
+                  <div key={id} className='post-div'>
+                    {ind !== 0 && <hr />}
+                    <ReplyView commentId={commentId}
+                      postId={thisPost.id} reply={comment}
                     />
                   </div>
-                ) 
+                )
               }
             })}
           </div>
         </section>
-  
-        <ReplyForm />
-        <ReplyReplyForm postId={postId} commentId={commentId} />
+        
         <Footer />
       </main>
     )
@@ -999,10 +432,29 @@ const PostView = () => {
 
 export default PostView
 
-// else if (notFound) {
-//   return (
-//     <div className="deleted-comment">
-//       Post was not found. Please refresh.
-//     </div>
-//   )
-// }
+
+
+
+
+const PostViewHeader = () => {
+  const { windowWidth } = useContext(appContext)
+
+  return (
+    <>
+      {windowWidth >= 700 && <Header />}
+      
+      <header className="post-view-header">
+        <BackButton navigateLink={-1} />
+
+        <div className="post-view-header-div">
+          Post
+        </div>
+      </header>
+    </>
+  )
+}
+
+
+
+
+

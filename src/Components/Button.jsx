@@ -2,7 +2,7 @@ import React from 'react'
 
 const Button = ({ textContent, postType }) => {
   return (
-    <button className={ textContent === postType ? "active" : null } >
+    <button className={ textContent === postType ? "active" : "" } >
       {textContent}
     </button>
   )

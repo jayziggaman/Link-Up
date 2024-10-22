@@ -1,16 +1,16 @@
 import { doc, updateDoc } from 'firebase/firestore'
 import React, { useContext, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import { appContext } from '../App'
 import { db } from '../firebase/config'
-import verifiedBadge from '../Images/verified-badge.jpg'
+import UserPfp from './GENERAL-COMPONENTS/UserPfp';
+import VerifiedBadge from './GENERAL-COMPONENTS/VerifiedBadge';
 
-const ProfileList = ({result, type, userId}) => {
-  const { users, user, userAuth } = useContext(appContext)
-  const location = useLocation()
+const ProfileList = ({ result, type, person }) => {
+  const { users, user } = useContext(appContext)
+  const { id, username, displayName, userType } = result
   
   const removeFollower = (userId) => {
-    const userRef = doc(db, 'users', userAuth)
+    const userRef = doc(db, 'users', user.id)
     updateDoc(userRef, {
       followers: {
         value: [...user.followers.value.filter(follower => follower !== userId)]
@@ -21,14 +21,14 @@ const ProfileList = ({result, type, userId}) => {
       const otherRef = doc(db, 'users', userId)
       updateDoc(otherRef, {
         following: {
-          value: [...otherUser.following.value.filter(follower => follower !== userAuth)]
+          value: [...otherUser.following.value.filter(follower => follower !== user.id)]
         }
       })
     })
   }
 
   const removeFollowing = (userId) => {
-    const userRef = doc(db, 'users', userAuth)
+    const userRef = doc(db, 'users', user.id)
     updateDoc(userRef, {
       following: {
         value: [...user.following.value.filter(follower => follower !== userId)]
@@ -39,7 +39,7 @@ const ProfileList = ({result, type, userId}) => {
       const otherRef = doc(db, 'users', userId)
       updateDoc(otherRef, {
         followers: {
-          value: [...otherUser.followers.value.filter(follower => follower !== userAuth)]
+          value: [...otherUser.followers.value.filter(follower => follower !== user.id)]
         }
       })
     })
@@ -48,6 +48,7 @@ const ProfileList = ({result, type, userId}) => {
   function run(id) {
     if (type === 'followers') {
       removeFollower(id)
+      
     } else if (type === 'following') {
       removeFollowing(id)
     }
@@ -55,24 +56,28 @@ const ProfileList = ({result, type, userId}) => {
 
   return (
     <div className="profile-list">
-      <Link to={result.id} className="search-result-img-div">
-        <img src={result?.avatarUrl} alt="" />
-      </Link>
+      <a href={`/${username}`} className="search-result-img-div">
+        <UserPfp user={result} />
+      </a>
 
-      <Link to={result.id} className="search-result-username">
-        <p>{result?.username} {result.userType === 'creator' && <img className='verified-badge' src={verifiedBadge} />} . {result?.followers.value?.length} {result?.followers.value?.length === 1 ? 'Follower' : 'Followers' }</p>
-        <p> {result?.displayName} </p>
-      </Link>
+      <a href={`/${username}`} className="search-result-username">
+        <p>
+          {displayName} {userType === 'creator' && <VerifiedBadge />}
+        </p>
 
-      {
-        userAuth === userId || location.pathname.includes('profile') &&
-        <div className="remove-follower">
-          <button onClick={() => run(result.id)}>
+        <p>
+          @{username}
+        </p>
+      </a>
+
+      <div className="remove-follower">
+        {user.id === person?.id &&
+          <button onClick={() => run(id)}>
             {type === 'followers' && 'remove'}
             {type === 'following' && 'unfollow'}
           </button>
-        </div>
-      }
+        }
+      </div>
     </div>
   )
 }

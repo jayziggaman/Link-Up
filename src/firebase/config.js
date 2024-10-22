@@ -1,12 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth"
+import { browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence } from "firebase/auth"
 import { collection, getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
 
 
 const firebaseConfig = {
   apiKey: "AIzaSyCbdZwarj1WFCoNvMF5-SrMTzGSEoGKVgM",
-  authDomain: "wowi-media.firebaseapp.com",
+  authDomain: "wowi-media.firebaseapp.com" || 'localhost' || 'wowi-media.web.app' || '172.20.10.7',
   projectId: "wowi-media",
   storageBucket: "wowi-media.appspot.com",
   messagingSenderId: "18381072013",
@@ -17,13 +17,15 @@ const firebaseConfig = {
 
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app)
+export const auth = getAuth();
+setPersistence(auth, browserSessionPersistence)
+
 export const db = getFirestore(app)
 export const postsRef = collection(db, 'posts')
 
 export const usersRef = collection(db, 'users')
 
-export const directMessagesRef = collection(db, 'directMessages')
+export const messageRoomsRef = collection(db, 'messageRooms')
 
 export const storage = getStorage(app)
 

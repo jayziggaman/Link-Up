@@ -1,77 +1,85 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { appContext } from '../App'
-import { FaPlus } from 'react-icons/fa'
-import Footer from '../Components/Footer'
-import Form from '../Components/Form'
-import Header from '../Components/Header'
-import Nav from '../Components/Nav'
-import Notification from '../Components/Notification'
+import Footer from '../COMPONENTS/Footer'
+import Header from '../COMPONENTS/Header'
+import Nav from '../COMPONENTS/Nav'
+import Notification from '../COMPONENTS/Notification'
 import { db } from '../firebase/config'
 import { doc, Timestamp, updateDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
+import noMedia from '../Images/no-media-found.jpg'
+import LoginMessage from '../COMPONENTS/GENERAL-COMPONENTS/LoginMessage'
+import NewPostIcon from '../ICONS/NewPostIcon'
 
 const Notifications = () => {
   const {
-    setNotificationCount, allPosts, users, user, userAuth, windowWidth, setShowForm, taggedPosts, setTaggedPosts, notifications, setNotiRed
+    setNotificationCount, allPosts, users, user, userAuth, windowWidth, setShowPostForm, taggedPosts, setTaggedPosts, notifications, setNotiRed
   } = useContext(appContext)
   const time = new Date()
   const navigate = useNavigate()
-
-  //know when the notification was sent
-
-  // console.log(notifications)
 
   useEffect(() => {
     setNotiRed(false)
   }, [])
 
   useEffect(() => {
-    if (user) {
+    if (user && user.id) {
+      let some = false
       const userRef = doc(db, 'users', user.id)
       const arr = []
       notifications.map(noti => {
         if (noti.counter === undefined) {
           noti.counter = time.getTime()
+          some = true
         }
       })
-      arr.push(...notifications)
-      updateDoc(userRef, {
-        notifications: {
-          value: [...arr]
-        }
-      })
+      if (some) {
+        arr.push(...notifications)
+        updateDoc(userRef, {
+          notifications: {
+            value: [...arr]
+          }
+        })
+     }
     }
   }, [user])
 
  
 
-
   return (
     <main className='notifications-main' >
-      {windowWidth > 800 && <Header />}
+      {windowWidth > 700 && <Header />}
       <Nav />
+
+      <LoginMessage />
+
       <section className="notifications-header">
         <div>
           <h1> Notifications </h1>
         </div>
         <div>
-          <img src={user?.avatarUrl} alt="" />
+          {user?.avatarUrl === '' || !userAuth ?
+            <div className='empty-notis-pfp'></div>
+            :
+            <img src={user?.avatarUrl} alt="" />
+          }
         </div>
       </section>
       <section className="notifications">
-        { notifications?.map((noti, index) => <Notification key={index} noti={noti}/>)}
-      </section>
-      <button className='new-post-icon' onClick={() => {
-        if (userAuth) {
-          setShowForm(true)
-        } else {
-          navigate('/login')
+        
+        {userAuth && notifications?.length > 0 ?
+          <>
+            {notifications?.map((noti, index) => <Notification key={index} noti={noti} />)} 
+          </>
+          :
+          <div className='no-media-div'>
+            <img className='no-media' src={noMedia} alt="" />
+            <p>Nothing to show here.</p>
+          </div>
         }
-      } }>
-        <FaPlus />
-      </button>
-
-      <Form />
+      </section>
+      
+      <NewPostIcon />
 
       <Footer />
     </main>
